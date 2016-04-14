@@ -116,6 +116,45 @@
 	
 	The first attempts at digital algorithmic composition were knowledge-based, and typically involved encoding explicit, hand-written compositional rules into code and using those rules to create or modify music. These systems notably incorporated no learning of any kind - the behaviour of the program was entirely determined by the initial set of rules and the input (typically a randomly generated melody). This had the effect of making the systems very ``brittle,'' meaning that performance typically dropped dramatically whenever the system encountered an unideal input - a very common occurrence due to the limited scope covered by the initial rules. This can be attributed to the fact that while the compositional principles used by humans are useful and powerful in human hands, they are heavily dependent on the composer providing their own creative input throughout the process.
 	
+	\subsection{Musical Grammars}
 	
+	Other more computationally focused attempts at musical knowledge-based systems have made use of formal grammars. A grammar consists of a set of nonterminal symbols $N$, a set of terminal symbols $\Sigma$ (s.t. $N \cap \sigma = \emptyset$), a start symbol $S \in N$, and a set of production rules that transform strings containing at least 1 nonterminal symbol. A grammar can be used to produce strings by taking a string consisting of the start symbol and repeatedly applying valid production rules to the string until it contains only terminal symbols. Grammars are thus well suited to parsing and generating hierarchical structures recursively, which makes them a good fit for music. 
+	
+	The first attempted use of a formal grammar for composition took place in 1973, using stuff  \cite{lidov1973melody}. %TODO obviously 
+	
+	
+	
+	\backmatter
+	
+	\bibliography{dissertation}
+	
+	% -----------------------------------------------------------------------------
+	
+	% The dissertation concludes with a set of (optional) appendicies; these are 
+	% the same as chapters in a sense, but once signaled as being appendicies via
+	% the associated macro, LaTeX manages them appropriatly.
+	
+	\appendix
+	
+	\chapter{An Example Appendix}
+	\label{appx:example}
+	
+	Content which is not central to, but may enhance the dissertation can be 
+	included in one or more appendices; examples include, but are not limited
+	to
+	
+	\begin{itemize}
+		\item lengthy mathematical proofs, numerical or graphical results which 
+		are summarised in the main body,
+		\item sample or example calculations, 
+		and
+		\item results of user studies or questionnaires.
+	\end{itemize}
+	
+	\noindent
+	Note that in line with most research conferences, the marking panel is not
+	obliged to read such appendices.
+	
+	% =============================================================================
 	
 \end{document}

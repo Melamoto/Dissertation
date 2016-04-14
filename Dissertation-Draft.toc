@@ -8,3 +8,5 @@
 \contentsline {section}{\numberline {2.1}Overview}{3}{section.2.1}
 \contentsline {section}{\numberline {2.2}Knowledge-Based Techniques}{3}{section.2.2}
 \contentsline {subsection}{\numberline {2.2.1}Rule-Based Systems}{3}{subsection.2.2.1}
+\contentsline {subsection}{\numberline {2.2.2}Musical Grammars}{3}{subsection.2.2.2}
+\contentsline {chapter}{\numberline {A}An Example Appendix}{7}{appendix.A}
