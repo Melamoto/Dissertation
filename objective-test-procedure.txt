@@ -1,0 +1,24 @@
+The procedure for evaluating the objective quality of a process should be
+undertaken as follows:
+
+Preparation of data:
+
+  - Find a selection of 15-40 appropriate similar musical pieces in 4/4 meter
+    with length 16 bars within the same genre
+  - For each of the pieces, create a sample replacing the final 4 bars from the
+    end with a machine composition (interacting with a skilled composer)
+
+Testing procedure (repeat for each sample):
+  - Use a similarity metric to measure the whole machine-composed sample to the
+    original set of music
+
+The evaluation metric of this test is the set of estimated similarities to the
+set of original pieces compared to the similarity of the original set to itself.
+
+Important detail:
+Similarity metrics like this are rare and very imperfect. Most notably,
+similarity metrics are a type of fitness measure - by definition a "good"
+similarity metric solves the problem this research is trying to solve. The best
+solution for this is to simply attempt to repeat this test with many different
+metrics. It does not indicate quality, but it at least demonstrates
+computational consistency - quality must be determined by subjective tests instead.

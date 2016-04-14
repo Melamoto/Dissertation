@@ -1,0 +1,31 @@
+The procedure for evaluating the subjective quality of a process should be
+undertaken as follows:
+
+Preparation of data:
+
+  - Find a selection of 4-10 appropriate musical pieces in 4/4 meter with length
+    8-16 bars
+  - For each of the pieces, create a sample replacing the final 4 bars from the
+    end with a machine composition (interacting with the original composer)
+
+Testing procedure (repeat for each sample piece):
+
+  - Give subject both the original and the modified piece in a random order
+  - Allow subject up to 3 minutes listening time
+  - Ask the subject to answer which piece they believe was composed by a machine
+  - Ask the subject to then rate each piece's quality on a scale 1-10
+  - Ask the subject for any additional comments on why they made their decision
+
+
+Important detail:
+Should the machine-generated piece be allowed to be "touched up" by human hands?
+For all practical purposes the machine's work would be touched up by a human,
+but the more modification is allowed the more the actual work of the machine is
+obscured.
+The ideal scenario here would be defining an allowed "edit distance" - a strict
+limit to the extent to which the composer may adjust the machine's work. A good
+edit distance will be hard to find however, as the balance is quite delicate.
+
+Also, answering previous questions may influence the subject's answer to a later
+question. This is not very avoidable with the experiment structure as is, and it
+is unlikely that this can be avoided.

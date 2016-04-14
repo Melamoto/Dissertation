@@ -1,0 +1,21 @@
+Please rate how useful you would find an intelligent "basic material" generator
+while composing, for each of the following:
+
+1) Continuation within a phrase of:
+  a) a single melodic line
+  b) a rhythmic pattern
+  c) a chord progression
+
+2) The beginning of a phrase for:
+  a) a single melodic line
+  b) a rhythmic pattern
+  c) a chord progression
+
+3) Variations of:
+  a) a single melodic line
+  b) a rhythmic pattern
+  c) a chord progression
+
+4) Counterpoint for an existing melody
+
+5) Harmonization for an existing melody

@@ -1,0 +1,46 @@
+The procedure for evaluating the subjective quality of a process in composition
+should be undertaken as follows:
+
+Preparation of data:
+
+  - Train the algorithm using a set of appropriate similar melodies selected by
+    the composer
+
+Testing procedure (repeat as necessary):
+
+  - Allow composer to write a melody corresponding to the fundamental similarity
+    requirements of the training set (meter, length, etc), sans the final
+    [4,2,1] bars
+  - Have the machine interact with the composer to attempt to finish the piece,
+    with some upper bound on the number of interactive iterations
+  - Allow the composer to make edits to the machine's output until it becomes
+    satisfactory, recording the number and type of edits made
+
+The main evaluation metric of this test is the total distance between the
+original machine output and the edited output (planned to be measured by the
+number and type of edits needed to bring the piece to an acceptable level of
+quality). 0 distance is a perfect score, while maximum distance is the worst
+possible score.
+
+Important detail:
+This experiment has no control case as is. This means that the experiment is
+fundamentally broken from a scientific perspective. This is because there exists
+no "unbiased" alternative - the only alternative material providers are other
+composers, who will vary immeasurably in compatibility with the active composer.
+Furthermore, there would be a clear bias available to the active composer as it
+would not be possible for them to be unaware of which material source was the
+machine.
+Two possible imperfect solutions are:
+  - Instead of having the active composer compose from scratch, instead give
+    them the first portion of an already written piece. First have them interact
+    with the machine and record distance, then have them interact with the original
+    composer. This is heavily flawed as it still leaves the compatibility and
+    awareness issues, and the active composer may be heavily biased to the original
+    composer due to trying to emulate their style in the compositional process.
+    It does however make the bias less "random," which helps for getting viable
+    results.
+  - Provide the composer with a randomly generated musical piece and have them
+    attempt to edit it until satisfactory. This has the advantage that it serves
+    as a good "baseline" for the machine composition to compare to. The
+    randomness will cause some variance in the results, and the experiment may
+    have to be repeated many times to overcome the noise.
