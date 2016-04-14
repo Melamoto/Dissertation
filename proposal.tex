@@ -1,0 +1,78 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=20mm]{geometry}
+
+\usepackage[
+backend=bibtex,
+style=numeric
+]{biblatex}
+
+\addbibresource{proposal.bib}
+
+\author{Stephen Livermore-Tozer}
+\title{Research Proposal: Algorithmic Co-composition Using Machine Learning}
+
+\begin{document}
+	\maketitle
+	
+	\section{Case for Support}
+	
+	\subsection{Overview}
+	
+	Machine learning is a field of study that has been growing at an extraordinary rate since its inception. It has been applied in a wide variety of areas, and is rapidly becoming the key technique in any task that involves the use of large amounts of data. One area in which machine learning still struggles to face real world application however is in the creation and refinement of art.
+	
+	Although a reasonable volume of research has been committed to producing ``creative'' artificial intelligence for the creation of art, there is currently very little to show for it in terms of practical applications. One of the key reasons for this is that, as in many extremely hard problems that depend on experience and intuition, machines are still far from outperforming skilled humans in the general case. This is to be expected as the technology is still emerging and somewhat immature, but the currently available technology may still be suitable to start producing real world results when focused on the right task.
+	
+	The research being put forward by this proposal is directed towards an artificial intelligence capable of performing a large subset of the skills used in song composition. The particular skills possessed by the AI will be such that instead of writing original compositions independently, it will perform interactive composition with a human composer. By doing so the AI is able to perform a significant share of the work during composition without being required to single-handedly tackle the full creative scope of the task. This approach addresses many of the shortcomings of current musical AI in the context of a practical implementation. 
+	
+	The key challenges that will be tackled by this research project can be summarised as:
+	
+	\begin{itemize}
+		\item Identification of the specific tasks in which AI is sufficiently powerful to assist skilled human composers, and in which automation is expected to have the most positive impact in the creative process.
+		\item Determining a set of machine learning algorithms that are capable of performing these tasks in such a way that the material they produce is useful to composers.
+	\end{itemize}
+	
+	Success in both of these areas would cleanly pave the way to practical musical AI. This would be a groundbreaking step forward within the field, as to date applied musical AI has served purely experimental or demonstrative purposes. Involving an AI directly in the real-world creative process of composition would provide enormous benefits to the field, in terms of useful research data, economic incentive, and public interest.
+	
+	\subsection{Background}
+	
+	% General background
+	The concept of using AI as part of the creative process in musical composition has existed for a long time.
+	
+	% Rule based systems
+	The earliest attempts at algorithmic composition were not knowledge-based, but rule-based. Musical experts would encode sets of compositional rules and constraints into code, which would then generate scores that followed these rules. Implementations of this method have been able to produce some interesting and occasionally powerful results. However, they are noted to be very ``brittle'', meaning that they tend to perform very poorly outside of certain cases. Performance improves slightly in specific subtasks, such as harmonization, but so far no suitable results have been produced.
+	
+	% Machine learning
+	Machine learning was introduced to composition during its earliest days, with the use of simple models such as Markov chains trained on small numbers of songs to generate rhythm \cite[]{pinkerton1956information}. These attempts tended to produce very low quality or simple output. The reasons for this include lack of processing power, lack of data sources, and the use of fairly unsophisticated methods. 
+	
+	More advanced approaches began to emerge decades based on the use of neural networks trained on a set of melodies to generate new melodies \cite[]{todd1989connectionist}. These methods still performed quite poorly in practise, but demonstrated more versatility and produced better subjective results than earlier attempts. Since then many more modern adaptations have been made to previous methods, such as using evolutionary search or learning rules from data. However, the results given by AI in pure composition are still quite poor according to subjective evaluation. 
+	
+	% Varied attempts
+	With this inadequacy of AI in its current state, most research is focused on specific subtasks of composition. These include tasks such as harmonization for specific genres or styles \cite[]{mcintyre1994bach}, measuring distance or `similarity' between musical objects \cite[]{horner1991genetic}, and generation of chord progressions \cite[]{chemillier2004toward}. The current AI landscape is not sufficient to create a whole original composition, as there are many gaps and imperfections in the work accomplished so far. 
+	
+	% Continuation
+	Continuation as a goal of algorithmic composition has been previously attempted with a few specific methods. 
+	
+	\subsection{Objectives}
+	
+	The general aim of this research is to determine the most effective method of current AI as applied to the task of algorithmic co-composition and evaluate its quality. This is given by the following set of specific objectives:
+	 
+	\begin{itemize}
+		\item Identify the set of related tasks in co-composition for which automation is likely to cause the most positive impact and current AI is not incapable of performing to some degree
+		\item Survey current methods for algorithmic composition that target these areas and are interactive or may be adapted to work interactively, and identify those that demonstrate the greatest proficiency in these areas
+		\item Experimentally evaluate the overall efficacy of these methods applied collectively through both objective and subjective analysis
+	\end{itemize}
+	
+	\subsection{Management plan}
+	
+	\section{Budget}
+	
+	\section{Justification For Resources}
+	
+	\section{Impact Statement}
+	
+	\section{Workplan}
+	
+	\printbibliography
+	
+\end{document}

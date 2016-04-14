@@ -1,0 +1,112 @@
+\documentclass[ author={Stephen Livermore-Tozer},
+				supervisor={Dr. Peter Flach},
+				degree={MEng},
+				title={Performing Algorithmic Co-composition Using Machine Learning},
+				subtitle={},
+				type={research},
+				year={2016} ]{dissertation}
+
+
+
+\begin{document}
+	
+	\maketitle
+	
+	\frontmatter
+	
+	\makedecl
+	
+	\tableofcontents
+	\listoffigures
+	\listoftables
+	\listofalgorithms
+	\lstlistoflistings
+	
+	% -----------------------------------------------------------------------------
+	
+	\chapter*{Executive Summary}
+	
+	% Hypothesis
+	For my research, I have investigated the hypothesis that existing methods of performing melodic composition using machine learning can be adapted to successfully perform co-composition with a human composer. In this context, success may be measured by subjective impression received from experts in composition. The exact set of tasks involved in the co-composition process is not fixed; part of this research involved finding the tasks that are both a) useful to the composer, and b) within the capabilities of current AI.
+	
+	% Achievements
+	In the pursuit of this objective, I have completed the following tasks:
+	\begin{itemize}
+		\item I surveyed a number of expert composers to identify the tasks within the domain of composition whose partial automation would provide the greatest benefit to the composer.
+		\item I performed research over existing machine learning methods for algorithmic composition, determining their applicability and estimated efficacy within the tasks obtained above.
+		\item I implemented an application that may be trained on a set of music data (stored in the Midi format) and will provide an attempted continuation of a given musical input, according to the tasks obtained above.
+		\item I designed and performed a series of objective and subjective tests to assess the performance of the application and the algorithms that comprise it.
+	\end{itemize}
+	
+	
+	% -----------------------------------------------------------------------------
+	
+	\chapter*{Supporting Technologies}
+	
+	I used the Anaconda implementation of Python to create my application. Furthermore, I used a set of libraries implementing machine learning techniques to create the application. These libraries are:
+	
+	\begin{itemize}
+		\item NumPy for efficient mathematical operations
+		\item SciPy for clustering and regression
+		\item PyBrain for neural networks
+		\item HmmLearn for hidden Markov models
+	\end{itemize}
+	
+	% -----------------------------------------------------------------------------
+	
+	\chapter*{Acknowledgements}
+	
+	I would like to thank my supervisor Peter Flach for his guidance over the course of this project in both its technical aspects and in its effective management.
+	
+	I would also like to thank my good friend Thomas Norton, for his expert musical advice and support throughout my work.
+	
+	\mainmatter
+	
+	% -----------------------------------------------------------------------------
+	
+	\chapter{Contextual Background}
+	\label{chap:context}
+	
+	\section{Algorithmic Composition}
+
+	\subsection{Overview}
+	
+	Algorithmic composition is defined as the use of algorithms to compose, in whole or in part, a musical score. This is generally accomplished using a computer, although many earlier systems could be traced out by hand. There exist a large and diverse number of algorithms designed for this task, accompanied by many different representations for musical data. Among these algorithms are a large number of methods for learning musical creativity, including supervised learning, unsupervised learning, rules and constraints, and stochastic modelling, among others.
+	
+	Although many methods for algorithmic composition have been defined over the past several decades, few have achieved notably useful or successful results. Even relatively sophisticated and advanced methods tend to produce music with notably inhuman idiosyncrasies or that is subjectively described as ``bland.'' There are several key contributing factors to this problem, two of which are the lack of both computational power the unavailability of sufficient quantities of useful data. One way of describing the core issue however is that there does not currently exist a good way of measuring or analysing human subjective impression to a broad or deep enough scale. Because of this nearly all current methods either attempt to codify compositional principles as used by humans, extract features from music known to be ``good,'' or perform some combination of the two. This is not necessarily an incorrect approach, but knowledge directly inscribed by humans is universally insufficient to capture all the necessary complexity of music created by humans, and it is currently prohibitively difficult for machine learning to extract meaningful features from existing music.
+	
+	\subsection{Previous Work}
+	
+	Using algorithms or similar formal methods in the composition of music is not a purely digital phenomenon - certain forms in classical music, such as \textit{canon}, involved using a set of instructions to develop a simple melody into a whole segment of a composition. 
+	% TODO: Some more examples of similar stuff
+	
+	The introduction of computers to the process of algorithmic composition occurred in the mid 1950s. At this time a number of experiments were proposed, and the first actual production 	
+	
+	\subsection{Rule-based systems}
+	
+	\section{Other stuff}
+	
+	% Current state of AI
+	Artificial Intelligence in its current state is a major component of the current technological landscape. As a broad field, AI plays a significant role in an enormous number of areas with a large technological component, including large industries such as finance, medicine, marketing, and internet services. In particular one of the most frequent and powerful uses is to learn from large quantities of data and perform analytical tasks, such as classifying samples in some way or identifying complex trends. 
+	
+	% Background of algorithmic composition
+	
+	
+	% What's the deal with it
+	There exist several reasons for the interest in the creation of AI that can compose music. The most directly practical of these is that music is a multi-billion pound industry, and music production has been revolutionised by technology on many occasions. The power of introducing a significant degree of automation to the process may be immense on both a financial and cultural scale.
+	
+	Additionally, the application of AI to the arts is a heavily romanticized achievement; ``creativity'' is quite universally considered to be a shortcoming of AI, and the creation of art is generally considered to be one of the most significant expressions of human creativity. Because of this, AI that is capable of creating art comparable to that created by humans represents a technological and cultural milestone.
+	
+	Within the sphere of the arts, music is a key target due to its heavily pattern-based, mathematical nature. Even with these advantages however, AI performance in composition is generally considered to be distinctly poor. According to the majority of subjective measures, AI is identifiably so due to being lacking in creating both interesting short-term melodies and coherent long-term structure. 
+	
+	
+	
+	% -----------------------------------------------------------------------------
+	
+	\chapter{Technical Background}
+	\label{chap:technical}
+	
+	
+	
+	
+\end{document}
