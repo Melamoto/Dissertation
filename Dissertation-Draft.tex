@@ -109,6 +109,7 @@
 	Additionally, many of these methods are focused on a specific subtask of composition; popular targets are chord identification, continuation of single line melody, and counterpoint, while many other algorithms focus on more specific tasks (typically relating to a particular genre, such as jazz or baroque). 
 	
 	\section{Knowledge-Based Techniques}
+	\label{sec:knowledge-techniques}
 	
 	Knowledge-based systems are those that use a symbolic representation of knowledge to complete a task, and were one of the first forms of AI created. This generally means storing a database of facts and then inferring with this data to resolve statements. In the case of algorithmic composition there are several common abstract approaches that use and represent knowledge in this way. 
 	
@@ -120,10 +121,60 @@
 	
 	Other more computationally focused attempts at musical knowledge-based systems have made use of formal grammars. A grammar consists of a set of nonterminal symbols $N$, a set of terminal symbols $\Sigma$ (s.t. $N \cap \sigma = \emptyset$), a start symbol $S \in N$, and a set of production rules that transform strings containing at least 1 nonterminal symbol. A grammar can be used to produce strings by taking a string consisting of the start symbol and repeatedly applying valid production rules to the string until it contains only terminal symbols. Grammars are thus well suited to parsing and generating hierarchical structures recursively, which makes them a good fit for music. 
 	
-	The first attempted use of a formal grammar for composition took place in 1973, using stuff  \cite{lidov1973melody}. %TODO obviously 
+	Formal grammars for composition first began to gain popularity in the mid 1970s, with hand-crafted grammars used to represent the structure of music \cite{lidov1973melody}\cite{rader1974method}. 
 	
+	\subsection{Supervised Learning Techniques}
+	\label{sec:supervised-techniques}
 	
+	% -----------------------------------------------------------------------------
 	
+	\chapter{Project Execution}
+	\label{chap:execution}
+	
+	\section{Analysis}
+	
+	\subsection{Objectives}
+	
+	The primary goal of this research is to explore the potential of integrating modern AI methods into the process of human musical composition. Thus it was not only necessary to investigate the AI algorithms themselves, but also their place within a human composer's work environment. The justification for this step is clear - an AI capable of performing or assisting only with tasks that are already trivial adds very little utility. It is therefore necessary as a preliminary step to identify the specific compositional tasks that will receive the greatest positive impact from the introduction of automation.
+	
+	\subsubsection{Survey}
+	
+	%TODO: Actually do the survey
+	
+	A survey was undertaken to determine the areas of greatest impact within musical composition. The target demographic of this survey was undergraduate music students. This group was selected for a combination of their expert or near-expert level of musical knowledge, experience with composition, and availability. 
+	
+	\section{Design}
+	
+	\subsection{Composition Algorithm}
+	
+	One of the key details that sets the intended method apart from most other algorithmic composition methods is its purely cooperative nature. This allows for a major performance benefit by offloading a certain portion the work to the human operator. There are three major places in which this offloading can take place: initializing state before generation, guiding the generation process, and adjusting the final generated output. The first is already implicitly taking place, as the algorithm is necessarily being designed to build on top of an already existing piece. The third is also an intrinsic part of the process, as the final output of the algorithm is provided to the user to be used as they please. The second may be exploited to improve the performance of the algorithm in generating output that is useful or pleasing to the user.
+	
+	Out of the wide range of algorithms used in algorithmic composition, the best suited to interactive composition of this variety are evolutionary algorithms (EAs). This is due to their use of a fitness function over a sample population; it is possible to augment the fitness assignment process by allowing the user to provide their preferences as a modification to each sample's fitness. A number of EAs have been designed with this behaviour in mind in order to overcome the challenge of defining an objective fitness function. This method has the major drawback that it typically causes a large amount of fatigue to the user - providing a rating to each sample once for each generation is a prohibitively large task for a human. To overcome this, it is generally attempted to minimize the population size and number of generation presented to the user, often by querying the user for input over a small subset of fitness evaluations. 
+	
+	\subsubsection{Musical Fitness}
+	\label{sec:fitness}
+	
+	\subsection{Population Generation}
+	
+	The choice of generation algorithm for the initial population of an EA can have a major impact on that EA's overall performance. An EA with a heuristic that generates a good set of initial solutions can achieve an ideal solution several orders of magnitude faster than an EA that uses a random starting population. This effect is particularly enhanced in scenarios where the output domain is very large while the percentage of good solutions is very small, as is very much the case with musical scores. A simple heuristic for generating approximately feasible melodies does not exist however; in the domain of music finding an approximately good solution is often approximately as difficult as finding a good solution. It is therefore necessary to use an additional algorithmic composition method for the purposes of generating a starting population.
+	
+	This method will need to satisfy several requirements to be viable as a population generator:
+	
+	\begin{itemize}
+		\item It must have a high run-time speed, as it will need to generate a large number of possible solutions before the EA can begin.
+		\item It must be able to produce many different outputs for the same input, as the population must have variance for the search to be efficient.
+		\item It must be non-interactive in order to not add to the user's fatigue, due to the presence of fatigue as a constraining factor on the EA's performance.
+		\item It must build its solutions off of the score already produced by the user in order for its output to be relevant to the EA.
+	\end{itemize}
+	
+	The first requirement implies the use of a technique that uses prior-obtained knowledge to find a solution rather than performing a broader search as with an EA. Two of the most effective and well documented ways to achieve this are handcrafted knowledge-based systems (\ref{sec:knowledge-techniques}) and supervised learning (\ref{sec:supervised-techniques}). In the former case it is necessary to compose a set of rules and/or constraints that will provide good output for the user's choice of input; this is difficult as these types of techniques are known to be brittle and not very versatile.	In particular most rulesets only perform well for specific genres, which prohibits creating a generalist system. Supervised learning on the other hand has the advantage of being versatile and adaptable based on the type of data being worked with. It is also convenient in this case as it is possible to use data already obtained for training the EA's fitness function (\ref{sec:fitness}).
+	
+	I reviewed a variety of supervised learning techniques that could be applied effectively to this task. The majority of documented methods use either recursive neural networks or hidden Markov models trained on a set of melodies. The main advantage provided by these techniques with regard to composition is that they are effective at extracting features from sequential data made from patterns.
+	The typical shortcoming of these techniques is that they are ineffective at representing coherent long-term patterns
+	
+	\section{Implementation}
+	
+		
 	\backmatter
 	
 	\bibliography{dissertation}
