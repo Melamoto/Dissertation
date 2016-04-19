@@ -172,6 +172,8 @@
 	
 	I reviewed a variety of supervised learning techniques that could be applied effectively to this task. The majority of documented methods use either recurrent neural networks or hidden Markov models trained on a set of melodies. The main advantage of these techniques with regard to composition is that they are effective at extracting features from sequential data consisting of predictable patterns. However, they also tend to be ineffective at representing coherent long-term patterns or understanding non-immediate context, which limits their overall use in composition. Fortunately this shortcoming is partially offset in this scenario by the fact that a skilled human composer will make modifications to the output from this stage as they direct the EA. Because of this it is not necessary for the population generator's output to fully account for certain long-term features, provided that it produces a reasonable variety of good material.
 	
+	%TODO: Mention use of Gray Code in durations
+	
 	\section{Training}
 	
 	As discussed in sections \ref{sec:fitness} and \ref{sec:pop-gen}, the AI contains several components using supervised learning. Therefore the results produced by these components, and by extension the AI, will be heavily dependent on the training data provided.
