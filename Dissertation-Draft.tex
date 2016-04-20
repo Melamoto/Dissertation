@@ -106,7 +106,8 @@
 	\section{Overview}
 	
 	There are many different methods for performing algorithmic composition, with a broad range of algorithms and data structures used. Most major AI techniques have many corresponding applications to algorithmic composition - it is also quite common for these techniques to be combined, such as combining neural networks and evolutionary algorithms. % TODO: Link to section
-	Additionally, many of these methods are focused on a specific subtask of composition; popular targets are chord identification, continuation of single line melody, and counterpoint, while many other algorithms focus on more specific tasks (typically relating to a particular genre, such as jazz or baroque). 
+	Additionally, many of these methods are focused on a specific subtask of composition; popular targets are chord identification, continuation of single line melody, and counterpoint, while many other algorithms focus on more specific tasks (typically relating to a particular genre, such as jazz or baroque).
+	
 	
 	\section{Knowledge-Based Techniques}
 	\label{sec:knowledge-techniques}
@@ -123,58 +124,66 @@
 	
 	Formal grammars for composition first began to gain popularity in the mid 1970s, with hand-crafted grammars used to represent the structure of music \cite{lidov1973melody}\cite{rader1974method}. 
 	
-	\subsection{Supervised Learning Techniques}
+	\section{Supervised Learning Techniques}
 	\label{sec:supervised-techniques}
+	
+	Another major branch of work within the field is the use of supervised learning to train AIs through a set of examples, instead of encoding knowledge by hand. This does away with many of the disadvantages of knowledge-based systems, particularly their brittle nature - by learning from examples, the AI can feasibly adapt to work with any particular style of music (with varying difficulty). Currently supervised learning is a very popular method for algorithmic composition, with a majority of papers from the past decade relying on it in some fashion \cite{fernandez2013ai}. This is linked to a combination of the newly widespread availability of musical data to learn from, the increase in computational power (and hence potential complexity of learning models compared to static models), and the high popularity of supervised learning in general.
+	
+	Generally however these methods still have some significant drawbacks. One of the most fundamental of these flaws is the fact that due to their knowledge being entirely derived from a training set they are limited in their ability to develop novel material, instead simply imitating the styles observed during training. There have been attempts to overcome this issue, with many of the most successful attempts using a combination of different techniques (see \ref{sec:hybrid-techniques}).
+	
+	\subsection{Artificial Neural Networks}
+	
+	The most popular class of supervised learning techniques in the context of algorithmic composition are artificial neural networks (ANNs). This can be related to their ability to learn a mapping from one set of data to another, allowing them to be adapted to a complex problem domain such as music. The earliest use of neural networks for algorithmic composition was during the late 80s, where a simple 3-layer recurrent neural network (RNN) was used to compose short monophonic melodies \cite{todd1989connectionist}. Many subsequent ANNs have used a similar design, with adjustments made to the topology and data representation. 
 	
 	% -----------------------------------------------------------------------------
 	
 	\chapter{Project Execution}
 	\label{chap:execution}
 	
-	\section{Objectives}
+%	\section{Objectives}
+%	
+%	The primary goal of this research is to explore the potential of integrating modern AI methods into the process of human musical composition. Thus it was not only necessary to investigate the AI algorithms themselves, but also their place within a human composer's work environment. The justification for this step is clear - an AI capable of performing or assisting only with tasks that are already trivial adds very little utility. It is therefore necessary as a preliminary step to identify the specific compositional tasks that will receive the greatest positive impact from the introduction of automation.. 
 	
-	The primary goal of this research is to explore the potential of integrating modern AI methods into the process of human musical composition. Thus it was not only necessary to investigate the AI algorithms themselves, but also their place within a human composer's work environment. The justification for this step is clear - an AI capable of performing or assisting only with tasks that are already trivial adds very little utility. It is therefore necessary as a preliminary step to identify the specific compositional tasks that will receive the greatest positive impact from the introduction of automation.
+	\section{Design}
 	
-	\subsubsection{Survey}
-	
-	%TODO: Actually do the survey
-	
-	A survey was undertaken to determine the areas of greatest impact within musical composition. The target demographic of this survey was undergraduate music students. This group was selected for a combination of their expert or near-expert level of musical knowledge, experience with composition, and availability. 
-	
-	\section{Composition Algorithm}
+	\subsection{Composition Algorithm}
 	
 	One of the key details that sets the intended method apart from most other algorithmic composition methods is its purely cooperative nature. This allows for a major performance benefit by offloading a certain portion the work to the human operator. There are three major places in which this offloading can take place: initializing state before generation, guiding the generation process, and adjusting the final generated output. The first is achieved by using the score written by the user as input to create new material from. The third is an intrinsic part of the process, as the final output of the algorithm is provided to the user to be used as they please. The second may be exploited to improve the performance of the algorithm in generating output that is useful or pleasing to the user.
 	
-	Out of the wide range of algorithms used in algorithmic composition, the best suited to interactive composition of this variety are evolutionary algorithms (EAs). This is due to their use of a fitness function over a sample population; it is possible to augment the fitness assignment process by allowing the user to provide their preferences as an input to determine each sample's fitness. A number of EAs have been designed with this behaviour in mind in order to overcome the challenge of defining an objective fitness function. This method has the major drawback that it typically causes a large amount of fatigue to the user - providing a rating to each sample once for each generation is a prohibitively large task for a human. To overcome this, it is generally attempted to minimize the population size and number of generations presented to the user, often by querying the user for input over a small subset of fitness evaluations. 
+	%Out of the wide range of algorithms used in algorithmic composition, the best suited to interactive composition of this variety are evolutionary algorithms (EAs). This is due to their use of a fitness function over a sample population; it is possible to augment the fitness assignment process by allowing the user to provide their preferences as an input to determine each sample's fitness. A number of EAs have been designed with this behaviour in mind in order to overcome the challenge of defining an objective fitness function. This method has the major drawback that it typically causes a large amount of fatigue to the user - providing a rating to each sample once for each generation is a prohibitively large task for a human. To overcome this, it is generally attempted to minimize the population size and number of generations presented to the user, often by querying the user for input over a small subset of fitness evaluations. 
 	
-	\subsection{Musical Fitness}
-	\label{sec:fitness}
+	There are a number of ways that this effect could be achieved. One would be the use of evolutionary algorithms. Due to their use of a fitness function to guide their search through the solution space, it is simple and straightforward to integrate user feedback into the EA by using user rating - either as the fitness function, or as some kind of augmentation to the fitness assignment process. A number of EAs have been designed with this behaviour in mind in order to overcome the challenge of defining an objective fitness function. This does however suffer a major drawback in that it is not feasible for an individual user to guide the search process single-handedly; due to the large number of samples that must be judged, user fatigue rapidly becomes a critical constraint. There have been attempts to mitigate this effect through various means, such as reducing the population, number of generations, or novel methods such as using clustering to avoid presenting the user with similar outputs. These methods each present their own limitations however, to an extent that was prohibitive in the case of this research project. 
+
+	% TODO: Explain and justify choice of algorithm									
 	
-	It is accurate to state that the EA is primarily defined by its fitness function: although choice of parameters and initial population may improve the rate at which it approaches an optimal solution, it is the fitness function that defines the optimal solutions. Because of this it is necessary to select a fitness function that will favour good results and prune bad ones. On an objective level this is completely infeasible if not impossible to achieve, hence the need for user intervention to guarantee a good result. Instead a more accurate (if quite abstract) goal for the fitness function should be to minimize the number of bad results presented to the user and adapt well to the user's direction. 
+	%\subsection{Musical Fitness}
+	%\label{sec:fitness}
 	
-	Through a review of the available literature I have determined that one of the best suited fitness functions to this task is the ARTMAP neural network fitness evaluator \cite{burton1998hybrid}. The main advantages to this method are its ability to adapt to a varied training set, its defined use of user input to direct the search process, and its inherent ability to detect similar patterns - thus preventing the user from being presented with the same results repeatedly. As a supervised learning technique it is necessary to provide a selection of training data
+	%It is accurate to state that the EA is primarily defined by its fitness function: although choice of parameters and initial population may improve the rate at which it approaches an optimal solution, it is the fitness function that defines the optimal solutions. Because of this it is necessary to select a fitness function that will favour good results and prune bad ones. On an objective level this is completely infeasible if not impossible to achieve, hence the need for user intervention to guarantee a good result. Instead a more accurate (if quite abstract) goal for the fitness function should be to minimize the number of bad results presented to the user and adapt well to the user's direction. 
 	
-	\section{Population Generation}
-	\label{sec:pop-gen}
+	%Through a review of the available literature I have determined that one of the best suited fitness functions to this task is the ARTMAP neural network fitness evaluator \cite{burton1998hybrid}. The main advantages to this method are its ability to adapt to a varied training set, its defined use of user input to direct the search process, and its inherent ability to detect similar patterns - thus preventing the user from being presented with the same results repeatedly. As a supervised learning technique it is necessary to provide a selection of training data
 	
-	The choice of generation algorithm for the initial population of an EA can have a major impact on that EA's overall performance. An EA with a heuristic that generates a good set of initial solutions can achieve an ideal solution several orders of magnitude faster than an EA that uses a random starting population. This effect is particularly enhanced in scenarios where the output domain is very large while the percentage of good solutions is very small, as is very much the case with musical scores. A simple heuristic for generating approximately feasible melodies does not exist however; in the domain of music finding an approximately good solution is often approximately as difficult as finding a good solution. It is therefore necessary to use an additional algorithmic composition method for the purposes of generating a starting population.
+	%\section{Population Generation}
+	%\label{sec:pop-gen}
 	
-	This method will need to satisfy several requirements to be viable as a population generator:
+	%The choice of generation algorithm for the initial population of an EA can have a major impact on that EA's overall performance. An EA with a heuristic that generates a good set of initial solutions can achieve an ideal solution several orders of magnitude faster than an EA that uses a random starting population. This effect is particularly enhanced in scenarios where the output domain is very large while the percentage of good solutions is very small, as is very much the case with musical scores. A simple heuristic for generating approximately feasible melodies does not exist however; in the domain of music finding an approximately good solution is often approximately as difficult as finding a good solution. It is therefore necessary to use an additional algorithmic composition method for the purposes of generating a starting population.
 	
-	\begin{itemize}
-		\item It must have a high run-time speed, as it will need to generate a large number of possible solutions before the EA can begin.
-		\item It must be able to produce many different outputs for the same input, as the population must have variance for the search to be efficient.
-		\item It must be non-interactive in order to not add to the user's fatigue, due to the presence of fatigue as a constraining factor on the EA's performance.
-		\item It must build its solutions off of the score already produced by the user in order for its output to be relevant to the EA.
-	\end{itemize}
+	%This method will need to satisfy several requirements to be viable as a population generator:
 	
-	The first requirement implies the use of a technique that uses prior-obtained knowledge to find a solution rather than performing a broader search as with an EA. Two of the most effective and well-documented ways to achieve this are handcrafted knowledge-based systems (\ref{sec:knowledge-techniques}) and supervised learning (\ref{sec:supervised-techniques}). In the former case it is necessary to compose a set of rules and/or constraints that will provide good output for the user's choice of input; this is difficult as these types of techniques are known to be brittle and not very versatile.	In particular most effective rulesets only perform well for specific genres, which prohibits creating a generalist system. Supervised learning on the other hand has the advantage of being versatile and adaptable based on the type of data being worked with. It is also convenient in this case as it is possible to use data already obtained for training the EA's fitness function (\ref{sec:fitness}).
+%	\begin{itemize}
+%		\item It must have a high run-time speed, as it will need to generate a large number of possible solutions before the EA can begin.
+%		\item It must be able to produce many different outputs for the same input, as the population must have variance for the search to be efficient.
+%		\item It must be non-interactive in order to not add to the user's fatigue, due to the presence of fatigue as a constraining factor on the EA's performance.
+%		\item It must build its solutions off of the score already produced by the user in order for its output to be relevant to the EA.
+%	\end{itemize}
 	
-	I reviewed a variety of supervised learning techniques that could be applied effectively to this task. The majority of documented methods use either recurrent neural networks or hidden Markov models trained on a set of melodies. The main advantage of these techniques with regard to composition is that they are effective at extracting features from sequential data consisting of predictable patterns. However, they also tend to be ineffective at representing coherent long-term patterns or understanding non-immediate context, which limits their overall use in composition. Fortunately this shortcoming is partially offset in this scenario by the fact that a skilled human composer will make modifications to the output from this stage as they direct the EA. Because of this it is not necessary for the population generator's output to fully account for certain long-term features, provided that it produces a reasonable variety of good material.
+	%The first requirement implies the use of a technique that uses prior-obtained knowledge to find a solution rather than performing a broader search as with an EA. Two of the most effective and well-documented ways to achieve this are handcrafted knowledge-based systems (\ref{sec:knowledge-techniques}) and supervised learning (\ref{sec:supervised-techniques}). In the former case it is necessary to compose a set of rules and/or constraints that will provide good output for the user's choice of input; this is difficult as these types of techniques are known to be brittle and not very versatile.	In particular most effective rulesets only perform well for specific genres, which prohibits creating a generalist system. Supervised learning on the other hand has the advantage of being versatile and adaptable based on the type of data being worked with. It is also convenient in this case as it is possible to use data already obtained for training the EA's fitness function (\ref{sec:fitness}).
+	
+	%I reviewed a variety of supervised learning techniques that could be applied effectively to this task. The majority of documented methods use either recurrent neural networks or hidden Markov models trained on a set of melodies. The main advantage of these techniques with regard to composition is that they are effective at extracting features from sequential data consisting of predictable patterns. However, they also tend to be ineffective at representing coherent long-term patterns or understanding non-immediate context, which limits their overall use in composition. Fortunately this shortcoming is partially offset in this scenario by the fact that a skilled human composer will make modifications to the output from this stage as they direct the EA. Because of this it is not necessary for the population generator's output to fully account for certain long-term features, provided that it produces a reasonable variety of good material.
 	
 	%TODO: Mention use of Gray Code in durations
 	
-	\section{Training}
+	\subsection{Training}
 	
 	As discussed in sections \ref{sec:fitness} and \ref{sec:pop-gen}, the AI contains several components using supervised learning. Therefore the results produced by these components, and by extension the AI, will be heavily dependent on the training data provided.
 	
