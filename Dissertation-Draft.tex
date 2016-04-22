@@ -170,6 +170,7 @@
 	As described in section \ref{sec:supervised-learning}, artificial neural networks (ANNs) are a powerful class of techniques for approximating functions, and recurrent neural networks (RNNs) extend their functionality to add a form of memory allowing for the comprehension of sequential data. Within this class there have been many different techniques created for performing melodic composition, with many featuring unusual novelties and useful unique properties.
 	
 	\subsection{Jordan Network With Sparse Pitch Representation and Planning Units}
+	\label{sec:todd-net}
 	
 	The first well-documented attempt at using ANNs for musical composition was made by Peter Todd \cite{todd1989connectionist}, who created a simple 3-layered RNN with a topology based on a Jordan network \cite{jordan1997serial} which composed monophonic melodies.
 	
@@ -241,9 +242,69 @@
 	
 	Following this, a subjective assessment was formed on the ability of the network to create new melodies outside of the training set. This displays one of the advantages of using planning units, as by enabling or disabling different plan inputs the network can be made to output songs of different styles drawing inspiration from one or more of the training songs. A number of observations were made about the original compositions produced by the network: one interesting property it displayed was that when using a single plan unit it tended to output melodies consisting of strings of pitches from the corresponding training melody, but stitched together in new orders at points where the pitches aligned. This ultimately results in the melodies eventually beginning to loop, as at some point the network ends up in a similar state to its initial state and starts playing the opening sequence again. It was also observed to have a very weak understanding of rhythm - the single neuron for representing the start of new notes was insufficiently complex to model the structured nature of musical rhythm. Despite training, the network was unable to establish a relationship between pitch changes and note beginnings.
 	
-	\subsection{Elman Network with Circle-of-Thirds Pitch}
+	\subsection{Elman Network with Circle-of-Thirds Pitch and Chaotic Inspiration}
+	\label{sec:coca-net}
 	
-	An alternative simple RNN to the Jordan network as described above is the Elman network \cite{elman1990finding}. The topology of an Elman network is similar to that of a Jordan network, but with different recurrent connections. While in the Jordan network the recurrent feedback is received in the input layer, in the Elman network it is instead received in the hidden layer. 
+	An alternative simple RNN to the Jordan network as described above is the Elman network \cite{elman1990finding}. The topology of an Elman network is similar to that of a Jordan network, but with different recurrent connections. While in the Jordan network the recurrent feedback is received in the input layer, in the Elman network it is instead received in the hidden layer. The specific model of Elman network for composition described here is as designed by Coca, Romero, and Zhao \cite{coca2011generation}.
+	
+	\begin{figure}[!ht]
+		\centering
+		\begin{tikzpicture}[
+		plain/.style={
+			draw=none,
+			fill=none,
+		},
+		net/.style={
+			matrix of nodes,
+			nodes={
+				draw,
+				circle,
+				inner sep=10pt
+			},
+			nodes in empty cells,
+			column sep=2cm,
+			row sep=-9pt
+		},
+		>=latex
+		]
+		\matrix[net] (mat)
+		{
+			|[plain]| \parbox{1.3cm}{\centering Input\\layer} & |[plain]| \parbox{1.3cm}{\centering Hidden\\layer} & |[plain]| \parbox{1.3cm}{\centering Output\\layer} \\
+			& |[plain]| & \\
+			|[plain]| & \\
+			& |[plain]| & \\
+			|[plain]| & |[plain]| \\
+			& & \\
+			|[plain]| & |[plain]| \\
+			& |[plain]| & \\
+			|[plain]| & \\
+			& |[plain]| & \\
+		};
+		\foreach \ai [count=\mi ]in {2,4,6}
+		\draw[<-] (mat-\ai-1) -- node[above] {Pitch \mi} +(-2cm,0);
+		\foreach \ai [count=\mi ]in {8,10}
+		\draw[<-] (mat-\ai-1) -- node[above] {Plan \mi} +(-2cm,0);
+		\foreach \ai in {2,4,6,8,10}
+		{\foreach \aii in {3,6,9}
+			\draw[->] (mat-\ai-1) -- (mat-\aii-2);
+		}
+		\foreach \ai in {3,6,9}
+			\draw[->] (mat-\ai-2) edge[in=150,out=30,loop] (mat-\ai-2);
+		\foreach \ai in {3,6,9}
+		{\foreach \aii in {2,4,6,8,10}
+			\draw[->] (mat-\ai-2) -- (mat-\aii-3);
+		}
+		\foreach \ai [count=\mi ]in {2,4,6,8,10}
+		\draw[->] (mat-\ai-3) -- node[above] {Ouput \mi} +(2cm,0);
+		\end{tikzpicture}
+		\caption{An example of a variety of Elman network}
+	\end{figure}
+	
+	The representation of music used by this particular network is quite different to that used in \ref{sec:todd-net}. Most distinctly it does not use the time slice representation for the temporal dimension, but instead assigns a duration value to each event. This shares the disadvantage of only allowing monophonic input/output, but places a greater emphasis on learning the temporal features of the input data. This helps overcome some of the issues mentioned earlier with regard to the ``new note'' feature.
+	
+	The pitch representation is also quite different, as there is no longer a one-to-one mapping of pitches to nodes. Instead, the pitch is split into two parts: the in-octave pitch and the octave. The representation for the octave is very simple and uses only 2 nodes, with the binary mapping $10 = \text{C2-B2}$, $01 = \text{C4-B4}$, and $00 = \text{C3-B3}$, with the network's output being snapped to the closest of these values. This can easily be extended to cover a wider range with a small increase in nodes, making this representation more versatile than the one used in Todd's design. The representation for the in-octave pitch is also split into two parts, based on intervals of 4 and 3 semitones (major and minor thirds). Each circle represents a set of pitches whose relative intervals are multiples of 4 and 3 for major and minor thirds respectively. A given note is then represented as a pair of binary strings length 3 and 4 representing the index of the circles it lies in. So for example, C is encoded as 1000 100, D is encoded as 0010 001, and E is encoded as 1000 010. This is a useful representation as it models relative pitch (for certain intervals), which is more relevant in most musical structure than absolute pitch, without some of the disadvantages imposed by purely relative pitch representation such as easily straying off-key. 
+	
+	The network also features an additional set of input nodes used for chaotic inspiration based on \cite{coca2010characterizing}. 
 	
 	\section{Distance Modelling with Hidden Markov Models for Monophonic Rhythms }
 	
