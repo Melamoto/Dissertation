@@ -8,8 +8,10 @@
 				
 \usepackage{tikz}
 \usetikzlibrary{matrix,chains,positioning,decorations.pathreplacing,arrows}
+\usepackage{graphicx}
+\usepackage{hyperref}
 
-
+\renewcommand{\baselinestretch}{1.15} 
 
 \begin{document}
 	
@@ -28,8 +30,6 @@
 	
 	% Hypothesis
 	For my research, I have investigated the hypothesis that existing methods of performing melodic composition using machine learning can be adapted to successfully perform co-composition with a human composer. In this context, success may be measured by subjective impression received from experts in composition. The exact set of tasks involved in the co-composition process is not fixed; part of this research involved finding the tasks that are both a) useful to the composer, and b) within the capabilities of current AI.
-	
-	The aim of this research project is to attempt to bridge some of the gap between the current theoretical state of algorithmic composition and the practical reality of AI in music.
 	
 	% Achievements
 	In the pursuit of this objective, I have completed the following tasks:
@@ -97,26 +97,50 @@
 	
 	Beyond the more abstract difficulties involved however, there are significant technical challenges in replicating human-like musical composition. These include the compositional complexity of most musical pieces (even music considered relatively simple), the colossal variety of styles and genres of music in existence, and the difficulty in obtaining data relating to human appreciation of music. Most AI research thus far has primarily been concerned with creating a robust model for the complex patterns present in real music; typically the goal is either to imitate elements of a pre-specified corpus of music (as in \cite{paiement2007generative} \cite{todd1989connectionist}) or produce wholly original work according to some prior-defined style (\cite{diaz2011composing} \cite{burton1998hybrid} \cite{horowitz1995representing}). 
 	
-	Despite numerous attempts using a wide range of AI methods (described further in section \ref{sec:abstract-methods}) there have been few significant successes in achieving this goal. The most notable of these is Iamus, a supercomputer running software based on the Melomics system \cite{diaz2011composing}, famous for being the first computer to compose professional contemporary classical music in its own style \cite{scientist2012computer}. Iamus' work has received mixed critical reception, although there is the strong possibility of bias resulting from the fact that composer was already known to be a computer. This system used an evolutionary algorithm with manually-encoded rules as a fitness function (\ref{sec:hybrid-systems}), meaning that it was directly instructed on how to produce classical music without the need for any learning to take place. This design has 
-		
-	\section{Industrial Impact}
+	Despite numerous attempts using a wide range of AI methods (described further in section \ref{sec:abstract-methods}) there have been few significant successes in achieving this goal. The most notable of these is Iamus, a supercomputer running software based on the Melomics system \cite{diaz2011composing}, and the first computer to compose professional contemporary classical music in its own style \cite{scientist2012computer}. This system used an evolutionary algorithm with manually-encoded rules as a fitness function (detailed in \ref{sec:hybrid-systems}), meaning that it was directly instructed on how to produce classical music without the need for any learning to take place. Iamus' work has received mixed critical reception, although there is the strong possibility of bias resulting from the fact that composer was already known by most critics to be a computer. Although this is a very impressive technical feat, it has not lead to any kind of industry adoption or significant public interest within the 6 years that have followed. This can be attributed to the fact that it exists as a standalone system; it does not integrate with any existing musical process and the work it produces is not in itself unique or useful.
+	
+	\section{Technology in Musical Composition}
 	
 	As detailed above, there has been a substantial amount of work invested into algorithmic composition up to this point. It is of notable importance that the vast majority of this work has developed from academic interest only, with very little direct involvement from industry towards the problem (and many of the companies that are involved emerged directly from academia). The cause for this is easily identifiable: there are few current financial incentives to pursue algorithmic composition. Although a high quality artificial composer would certainly be a valuable asset, technology is recognizably quite far away from achieving something effective enough to put to market with a high expected return on investment. This slows down the rate of progress in the study of algorithmic composition, and quite possibly computational creativity as a whole; while current research is going strong, the problem being tackled is immense and the resources available comparatively small. 
 	
-	The financial incentive for investment in algorithmic composition given the reasonable possibility of achieving success is also quite evident. The music industry is currently valued at over \pounds 10.0 billion globally \cite{smirke2015global}, with the UK retail value worth over \pounds 900 million \cite{riaj2015global}.
+	The financial incentive for investment in algorithmic composition given the reasonable possibility of achieving success is also quite evident. The music industry is currently valued at over \pounds 10.0 billion globally \cite{smirke2015global}, with the UK retail value worth over \pounds 900 million \cite{riaj2015global}. Any kind of new technology capable of providing a fundamental boon to production is therefore of high value. 
 	
-	%TODO: Tom can probably help you come up with stuff for this section.
-	Music as a sector has already been revolutionized by technology in many ways within the past 60 years. The invention of the synthesizer 
+	% Traditional Composition stuff
 	
-	\section{Social Impact}
+	In modern times, technology has served to greatly augment the compositional process. The invention of the 
+	analogue synthesizer and its subsequent rise to widespread popularity in the 1960s-1970s provided a powerful new tool to composers. This electronic instrument not only produced a unique sound unlike any traditional acoustic instruments, but proved highly versatile during composition due to the ability to synthesize sounds similar to different instruments. This functionality began to reach its true potential in the early 1980s, as polyphonic electronic keyboards incorporating many different sounds as part of their hardware began to enter popular use. This single piece of equipment gave individual producers the ability to both compose and perform each part of an entire multi-instrumental score by themselves. These advancements began to peak with the invention of software synthesizers and the MIDI format (see \ref{sec:midi}), imbuing a computer with the power to fully score and synthesize virtually any kind of music. These advances have had enormous consequences for the world of music, as it has become possible for any individual with access to an inexpensive digital workstation to create, perform, and distribute music that would have required an entire orchestra or even been impossible to create otherwise.
 	
-	As mentioned above
+	% TODO: Definitely mention existing CAAC software (page 3 of the survey)
 	
-	Additionally, the application of AI to the arts is a heavily romanticized achievement; ``creativity'' is quite universally considered to be a shortcoming of AI, and the creation of art is generally considered to be one of the most significant expressions of human creativity. Because of this, AI that is capable of creating art comparable to that created by humans represents a technological and cultural milestone.
+	\section{AI in Creative Media}
 	
-	Within the sphere of the arts, music is a key target due to its heavily pattern-based, mathematical nature. Even with these advantages however, AI performance in composition is generally considered to be distinctly poor. According to the majority of subjective measures, AI is identifiably so due to being lacking in creating both interesting short-term melodies and coherent long-term structure. 
+	Although artificial intelligence has enjoyed enormous recent success in research and industry, it has also begun to see employment in entertainment as well. Although no AI has yet taken over a popular, mainstream creative role ordinarily performed by humans, there have been many cases where an AI has provided novelty or entertainment within an established art form.
 	
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=1.0\textwidth]{deep-dream-example}
+		\caption{An image before and after processing by Google DeepDream}
+	\end{figure}
 	
+	One of the most recent well-known cases of this is Google's ``DeepDream,'' an online application that uses computer vision technology to enhance images according to detected features, morphing details to exaggerate falsely perceived visual elements (quite commonly biological) resulting in a highly surreal output reminiscent of dreams or hallucinations. This has received popular attention as potentially a form of true AI-created art, with numerous articles discussing the philosophical consideration that it could be considered true art \cite{rayner2016google} \cite{galperina2015google} and an actual art exhibition featuring its work \cite{campbell2016inside}.
+	
+	AI has also demonstrated a surprisingly high proficiency in writing both fiction and non-fiction. Technically-oriented AI writers have already been employed in a professional environment by the company Narrative Science, in the form of their Quill platform: a service that analyses data, identifies data trends and other kinds of useful information, and performs natural language communication to relay results and answer questions \cite{woodie2016big}. Creative AI has also seen recent success as an algorithmically co-written story was recently entered into a literary competition (intended primarily for humans) and outperformed many of its human competitors \cite{tarantola2016ai}. In this sense, computer-human collaboration has already reached the level of a skilled human within the domain of writing. 
+	
+	\section{Project Aims}
+	
+	The aim of this research project is to attempt to bridge some of the gap between the current theoretical state of algorithmic composition and the practical reality of AI in music. The final goal is the development of an algorithm that provides useful melodic material based on the work of a human composer in a manner that is realistic with regard to human composition.
+	
+	To be considered successful, this algorithm must demonstrate the ability to generate monophonic melodic music in a style that is similar to that of an existing musical piece. As the goal in this case is not to simply create an entire self-contained song but to assist a human in the creation of their own song, the algorithm should not simply output a single complete melody. Instead, the algorithm must be able to provide a set of different outputs for each position within the song so that utility to the user is maximized. Additional facilities to increase gain to the user, such as allowing the user to direct the generation process via some interactive means, are also being searched for. Finally, the program must be be such that regular use is feasible in a typical modern compositional context: there must be no hardware, time, or manpower requirements that would be extraordinary for a single musician working independently.
+	
+	To summarise, the specific objectives of this project are:
+	\begin{enumerate}
+		\item Survey literature relating to algorithmic melody composition to determine a set of viable methods for expanding existing musical scores
+		\item Adapt one or more of these algorithms to write partial melodic sequences that fill gaps in or provide variations to an existing melody
+		\item Implement an application using this algorithm that allows operation by a non-technical user in a timespan appropriate for practical use (a reasonable estimation would be 1 minute per bar)
+		\item Assess the effectiveness of the algorithm(s) in the context of completing a melody through a set of objective tests
+		\item Determine, for each algorithm being tested, a strategy that enables user interaction with the melodic generation process in some guiding capacity
+		\item Assess the effectiveness of the extended algorithm(s) in the same manner as the original and determine the improvements offered by increased levels of human-computer interaction
+	\end{enumerate}
 	
 	% -----------------------------------------------------------------------------
 	
@@ -142,7 +166,7 @@
 	
 	Knowledge-based models use explicitly stored knowledge of some variety to perform computation. They are one of the more intuitive and easy-to-use types of AI, and represent the vast majority of early digital methods for algorithmic composition. There are generally two ways in which this knowledge is obtained; either it is explicitly added by the programmer when the AI is created, or it is learned implicitly from a set of sample cases. The former case has the clear weakness that it can only produce music that it has been explicitly taught how to produce; this puts a harsh limit on the versatility and creativity of the AI. Nonetheless this can be quite an appealing method to use, due to both its computational simplicity and the fact that it can be directly inscribed with compositional principles derived from well-established music theory. Implicitly obtained knowledge on the other hand is much more versatile but is heavily reliant on the quantity and quality of the data provided. The extraction of knowledge from a training set is also a difficult task with many possible solutions - this may also be validly categorised as supervised learning, but is listed here for simplicity's sake. 
 	
-	%TODO: Find citations for your broad statements, i.e. popularity
+	%TODO: Find citations for your broad statements, e.g. popularity
 	One of the main types of knowledge used in knowledge-based systems is a set of rules/constraints, which is combined with an algorithm that produces an output satisfying these constraints. These techniques are attractive as they have the most direct analogue to music theory. Due to their heavily restricted form however, they are typically poorly suited to performing pure composition. Instead they are typically focused on broad but well-constrained tasks such as harmonization \cite{thomas1985vivace} or jazz improvisation over existing melodies \cite{horowitz1995representing}. Notably in recent decades there has been a significant shift from the use of hard satisfaction of constraints to probabilistic and optimizing methods.
 	
 	Another common way to store knowledge is as a formal grammar. A formal grammar defines a kind of formal language consisting of a set of symbols that may be arranged according to strict hierarchical structural rules. By creating a grammar that uses musical elements of some kind as its basic symbols, the set of rules used by the grammar can be used to model a style of composition. This is useful when applied to music, due to the natural geometric structure behind most musical composition. However it can also be noted that formal grammars are limited in the degree to which they can comprehend long-term context, an important feature of music that formal grammars struggle to address \cite{moorer1972music}.	 
@@ -300,53 +324,29 @@
 		\caption{An example of a variety of Elman network}
 	\end{figure}
 	
-	The representation of music used by this particular network is quite different to that used in \ref{sec:todd-net}. Most distinctly it does not use the time slice representation for the temporal dimension, but instead assigns a duration value to each event. This shares the disadvantage of only allowing monophonic input/output, but places a greater emphasis on learning the temporal features of the input data. This helps overcome some of the issues mentioned earlier with regard to the ``new note'' feature.
+	The representation of music used by this particular network is quite different to that used in \ref{sec:todd-net}. Most distinctly it does not use the time slice representation for the temporal dimension, but instead assigns a duration value to each event. This shares the disadvantage of only allowing monophonic input/output, but places a greater emphasis on learning the temporal features of the input data. This helps overcome some of the issues mentioned earlier with regard to the ``new note'' feature. The representation for the duration of a note is given as a binary string whose actual binary value represents the duration of the note. The conversion between numerical value and musical time is such that a crotchet (quarter note) has a duration value of 96. This is the exact value used by the MIDI standard (\ref{sec:midi}), chosen such that it can represent all standard note divisions (semiquavers, crotchet triplets and quaver triplets) as well as the small irregularities in timing that occur during live performance. 
 	
 	The pitch representation is also quite different, as there is no longer a one-to-one mapping of pitches to nodes. Instead, the pitch is split into two parts: the in-octave pitch and the octave. The representation for the octave is very simple and uses only 2 nodes, with the binary mapping $10 = \text{C2-B2}$, $01 = \text{C4-B4}$, and $00 = \text{C3-B3}$, with the network's output being snapped to the closest of these values. This can easily be extended to cover a wider range with a small increase in nodes, making this representation more versatile than the one used in Todd's design. The representation for the in-octave pitch is also split into two parts, based on intervals of 4 and 3 semitones (major and minor thirds). Each circle represents a set of pitches whose relative intervals are multiples of 4 and 3 for major and minor thirds respectively. A given note is then represented as a pair of binary strings length 3 and 4 representing the index of the circles it lies in. So for example, C is encoded as 1000 100, D is encoded as 0010 001, and E is encoded as 1000 010. This is a useful representation as it models relative pitch (for certain intervals), which is more relevant in most musical structure than absolute pitch, without some of the disadvantages imposed by purely relative pitch representation such as easily straying off-key. 
 	
-	The network also features an additional set of input nodes used for chaotic inspiration based on \cite{coca2010characterizing}. 
+	\subsubsection{Chaotic Inspiration}
+	\label{sec:chaotic-inspiration}
+	
+	The network also features an additional set of input nodes used for chaotic inspiration based on the algorithm described in \cite{coca2010characterizing}. This algorithm is based on the principle of generating music through chaotic dynamical systems. This is a branch of algorithmic composition, first explored in the late 1980s \cite{pressing1988nonlinear}, that differs greatly from the AI methods previously explained; instead of attempting to directly model compositional methods in some way, a mathematical model is developed that maps systems with chaotic behaviour to musical scores. The power of these systems comes from the fact that these models generate fractal objects with structures similar to those found in the analysis of classical music. Naturally most results in this area are not well suited to composing complete musical scores due to their unrefined and somewhat erratic nature, but are quite well suited to producing musical material from which a composer can be inspired.
+	
+	Coca, Tost, and Zhao's algorithm uses a nonlinear dynamic system consisting of three variables. These variables are drawn from an existing melody, with the first being extracted from pitches, the second from rhythm, and the third from musical dynamics (amplitude and velocity). It also takes a set of inputs defining a specification for the musical scale in which the output piece is to be written. The algorithm then uses these inputs to map the extracted variables into a new melody, stored in the MIDI file format (\ref{sec:midi}). As is expected from a chaotic system, a small change to the input variables can cause a disproportionately large change to the output values while still producing a result of similar quality.
+	
+	This algorithm is used to generate a source of ``inspiration'' that can be used in the creation of a melody. The goal of inspiration in the context of algorithmic composition is to create variations in the melody generation process by modifying the system in a way that preserves the original information; typically this is accomplished by adding a new input to the system which provides a source of variance. This is very useful for systems in which a large number of possible outputs are desired, such as those that present their results to some selection process (e.g. evolutionary algorithms). The use of chaotic algorithms to generate this inspiration is advantageous due to the fact that their output has a similar fractal structure to real music, meaning that a given inspirational segment contains a structure that the final output melody will be built on in some way.
+	
+	In this particular compositional algorithm, the input melody from which the chaotic inspiration is drawn is the same as the melody being learned during training, or the melody being recreated while composing. A subset of the notes from the chaotic inspiration are provided as input to the network, . In the paper (\cite{coca2011generation}) the varied results are provided by changing the number of notes taken from the chaotic inspiration as input.
 	
 	\section{Distance Modelling with Hidden Markov Models for Monophonic Rhythms }
 	
 	As discussed in section \ref{sec:supervised-learning}, Markov models tend to have trouble with the kind of complex structure involved in melodic pitch sequences. Using a hidden Markov model helps improve the model's performance in dealing with more complicated sequential patterns. While this type of model is still quite weak in terms of comprehending pitch, it is more capable of recording and recreating simple rhythmic patterns across moderate durations. While this alone is not a common use for HMMs due to their inability to model true long-term patterns, they can be used as part of a hybrid system using a model of rhythmic distances to greater effect \cite{paiement2007generative}.
 	
-	The HMM used to model rhythmic patterns uses a fairly straightforward representation.	
+	The HMM used to model rhythmic patterns uses a fairly straightforward time slice representation for rhythm. The time of 
 	
-	
-%	
-%	\section{Overview}
-%	
-%	There are many different methods for performing algorithmic composition, with a broad range of algorithms and data structures used. Most major AI techniques have many corresponding applications to algorithmic composition - it is also quite common for these techniques to be combined, such as combining neural networks and evolutionary algorithms. % TODO: Link to section
-%	Additionally, many of these methods are focused on a specific subtask of composition; popular targets are chord identification, continuation of single line melody, and counterpoint, while many other algorithms focus on more specific tasks (typically relating to a particular genre, such as jazz or baroque).
-%	
-%	
-%	\section{Knowledge-Based Techniques}
-%	\label{sec:knowledge-techniques}
-%	
-%	Knowledge-based systems are those that use a symbolic representation of knowledge to complete a task, and were one of the first forms of AI created. This generally means storing a database of facts and then inferring with this data to resolve statements. In the case of algorithmic composition there are several common abstract approaches that use and represent knowledge in this way. 
-%	
-%	\subsection{Rule-Based Systems}
-%	
-%	The first attempts at digital algorithmic composition were knowledge-based, and typically involved encoding explicit, hand-written compositional rules into code and using those rules to create or modify music. These systems notably incorporated no learning of any kind - the behaviour of the program was entirely determined by the initial set of rules and the input (typically a randomly generated melody). This had the effect of making the systems very ``brittle,'' meaning that performance typically dropped dramatically whenever the system encountered an unideal input - a very common occurrence due to the limited scope covered by the initial rules. This can be attributed to the fact that while the compositional principles used by humans are useful and powerful in human hands, they are heavily dependent on the composer providing their own creative input throughout the process.
-%	
-%	\subsection{Musical Grammars}
-%	
-%	Other more computationally focused attempts at musical knowledge-based systems have made use of formal grammars. A grammar consists of a set of nonterminal symbols $N$, a set of terminal symbols $\Sigma$ (s.t. $N \cap \sigma = \emptyset$), a start symbol $S \in N$, and a set of production rules that transform strings containing at least 1 nonterminal symbol. A grammar can be used to produce strings by taking a string consisting of the start symbol and repeatedly applying valid production rules to the string until it contains only terminal symbols. Grammars are thus well suited to parsing and generating hierarchical structures recursively, which makes them a good fit for music. 
-%	
-%	Formal grammars for composition first began to gain popularity in the mid 1970s, with hand-crafted grammars used to represent the structure of music \cite{lidov1973melody}\cite{rader1974method}. 
-%	
-%	\section{Supervised Learning Techniques}
-%	\label{sec:supervised-techniques}
-%	
-%	Another major branch of work within the field is the use of supervised learning to train AIs through a set of examples, instead of encoding knowledge by hand. This does away with many of the disadvantages of knowledge-based systems, particularly their brittle nature - by learning from examples, the AI can feasibly adapt to work with any particular style of music (with varying difficulty). Currently supervised learning is a very popular method for algorithmic composition, with a majority of papers from the past decade relying on it in some fashion \cite{fernandez2013ai}. This is linked to a combination of the newly widespread availability of musical data to learn from, the increase in computational power (and hence potential complexity of learning models compared to static models), and the high popularity of supervised learning in general.
-%	
-%	Generally however these methods still have some significant drawbacks. One of the most fundamental of these flaws is the fact that due to their knowledge being entirely derived from a training set they are limited in their ability to develop novel material, instead simply imitating the styles observed during training. There have been attempts to overcome this issue, with many of the most successful attempts using a combination of different techniques (see \ref{sec:hybrid-techniques}).
-%	
-%	\subsection{Artificial Neural Networks}
-%	
-%	The most popular class of supervised learning techniques in the context of algorithmic composition are artificial neural networks (ANNs). This can be related to their ability to learn a mapping from one set of data to another, allowing them to be adapted to a complex problem domain such as music. The earliest use of neural networks for algorithmic composition was during the late 80s, where a simple 3-layer recurrent neural network (RNN) was used to compose short monophonic melodies \cite{todd1989connectionist}. Many subsequent ANNs have used a similar design, with adjustments made to the topology and data representation. 
-	
-	% -----------------------------------------------------------------------------
+	\section{The Midi Format}
+	\label{sec:midi}
 	
 	\chapter{Project Execution}
 	\label{chap:execution}
