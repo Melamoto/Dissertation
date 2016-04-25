@@ -32,15 +32,16 @@
 	\chapter*{Executive Summary}
 	
 	% Hypothesis
-	For my research, I have investigated the hypothesis that existing methods of performing melodic composition using machine learning can be adapted to successfully perform co-composition with a human composer. In this context, success may be measured by subjective impression received from experts in composition. The exact set of tasks involved in the co-composition process is not fixed; part of this research involved finding the tasks that are both a) useful to the composer, and b) within the capabilities of current AI.
+	For my research, I have investigated the hypothesis that existing methods of performing melodic composition using machine learning can be adapted to successfully perform co-composition with a human composer. In this context, success may be measured by subjective impression received from experts in composition. 
 	
 	% Achievements
 	In the pursuit of this objective, I have completed the following tasks:
 	\begin{itemize}
-		\item I surveyed a number of expert composers to identify the tasks within the domain of composition whose partial automation would provide the greatest benefit to the composer.
-		\item I performed research over existing machine learning methods for algorithmic composition, determining their applicability and estimated efficacy within the tasks obtained above.
-		\item I implemented an application that may be trained on a set of music data (stored in the Midi format) and will provide an attempted continuation of a given musical input, according to the tasks obtained above.
-		\item I designed and performed a series of objective and subjective tests to assess the performance of the application and the algorithms that comprise it.
+		\item I performed research over existing machine learning methods for algorithmic composition, determining their potential with regards to the main objective and their overall compositional effectiveness.
+		\item I implemented the algorithms that I covered in my research, making adjustments and improvements where necessary to make them suitable for use in an application.
+		\item I adapted the algorithms to add new features that take advantage of the availability of a human composer and the existing composition being built upon.
+		\item I designed and created an application using these algorithms that may be trained on a set of music data (stored in the MIDI format) and will provide an attempted continuation of a given musical input.
+		\item I designed and carried out a series of objective and subjective tests to assess the performance of the application and the algorithms that comprise it.
 	\end{itemize}
 	
 	
@@ -151,8 +152,15 @@
 	\chapter{Technical Background}
 	\label{chap:technical}
 	
-	This chapter covers previous work in the field of algorithmic composition, both as a broad overview of the landscape and an in-depth explanation of the particular work directly relevant to this research.
-
+	This chapter covers previous work and prominent technology in the field of algorithmic composition, both as a broad overview of the landscape and an in-depth explanation of the particular work directly relevant to this research.
+	
+	\section{The Midi Standard}
+	\label{sec:midi}
+	
+	The MIDI (Musical Instrument Digital Interface) standard was published in 1983 as a universal interface for synthesizers  \cite{swift1997brief}. The design of MIDI was such that the format could provide full musical control over any synthesizer device, and enabled communication between any pair of MIDI-enabled devices. The upshot of this was that the MIDI format served as a new kind of compositional notation that could be read and played automatically by any synthesizer device. This later came to include computers with the invention of software synthesizers (discussed in \ref{sec:tech-in-music}), ultimately enabling the use of the PC as a full composer's studio, with the ability to write music with any number of different instruments and have it played back live. 
+	
+	The MIDI standard is especially useful for algorithmic composition, as it provides a machine-readable format that supports any kind of music with a rich selection of supporting libraries and applications. From an application perspective it is easy to read, write, and play back MIDI files, removing the need to rely on any external application to generate and display a composition. 
+	
 	\section{Abstract Methods for Algorithmic Composition}
 	\label{sec:abstract-methods}
 	
@@ -392,12 +400,6 @@
 	This process repeats until it the partition reaches a stable value, i.e. none of $x_1$ to $x_l$ change during an iteration. The objective of this algorithm is to find a solution that tried to maximize likelihood according to both of the models. Specifically, this algorithm is a form of the Greedy Max Cut method \cite{rohde2002methods}, a Multidimensional Scaling optimization algorithm which has proven to be optimal in terms of running time and performance for this type of search problem. Of particular importance is the constant $\lambda$, which sets a balance between the two constraints being optimized; high values of $\lambda$ prioritize the distance measure, while low values prioritize the HMM.
 	
 	
-	\section{The Midi Standard}
-	\label{sec:midi}
-	
-	The MIDI (Musical Instrument Digital Interface) standard was published in 1983 as a universal interface for synthesizers  \cite{swift1997brief}. The design of MIDI was such that the format could provide full musical control over any synthesizer device, and enabled communication between any pair of MIDI-enabled devices. The upshot of this was that the MIDI format served as a new kind of compositional notation that could be read and played automatically by any synthesizer device. This later came to include computers with the invention of software synthesizers (discussed in \ref{sec:tech-in-music}), ultimately enabling the use of the PC as a full composer's studio, with the ability to write music with any number of different instruments and have it played back live. 
-	
-	The MIDI standard is especially useful for algorithmic composition, as it provides a machine-readable format that supports any kind of music with a rich selection of supporting libraries and applications. From an application perspective it is easy to read, write, and play back MIDI files, removing the need to rely on any external application to generate and display a composition. 
 	
 	\chapter{Project Execution}
 	\label{chap:execution}
@@ -468,7 +470,7 @@
 	
 	\section{Implementation}
 	
-	\subsection{Jordan Network with Distance Measure}
+	\subsection{Jordan Network with Hidden Markov Model and Distance Measure}
 	\label{sec:jordan-implementation}
 	
 	The first method that I implemented was a combination of two algorithms taken from literature: Peter Todd's simple Jordan RNN (\ref{sec:todd-net}) and Paiement, Grandvalet, Bengio and Eck's distance model for rhythms (\ref{sec:distance-model}). The reason for the merging of these two methods was that Todd's RNN has proven to be quite capable at modelling patterns in pitch sequences, but has a very weak ability to model rhythm. Therefore augmenting the algorithm using a purely rhythmic model seemed to be the most effective way to achieve a good result.
@@ -500,13 +502,17 @@
 	
 	The scoring function is used to assign a probability to a given bar according to the Binomial mixture model learned during training applied to the distance between the bar and all preceding bars within the piece. Specifically, the BMM is used to calculate an overall probability for each pairing $p(d_{i,j} = \beta_{i,j} + \delta) = \sum_{k=1}^{c} w_{i,j}^{(k)} B(\delta,\alpha_{i,j},\beta_{i,j},p_{i,j}^{(k)})$, and the log of their sum is taken to be the score.
 	
-	An alteration that needed to be made to the original scoring function defined in \cite{paiement2007generative} was the introduction of a gradient to the probability mass function. This was necessary due to the fact that in some circumstances the HMM would generate an initial rhythm with probability $0$ for all subpopulations within the BMM, resulting in a score of $\log 0 = -\infty$ (within NumPy). Although this is strictly speaking a correct score, if all adjacent rhythms are also impossible then the Greedy Max Cut algorithm will find a gradient of $0$ and converge. As a correction to ensure that GMC is able to correctly converge to a valid rhythm, it is necessary to artificially introduce a gradient to the probability function such that impossible rhythms have a lower score than ``less impossible'' rhythms. This modified probability function is defined as:
+	An alteration that needed to be made to the original scoring function defined in \cite{paiement2007generative} was the introduction of a gradient to the probability mass function. This was necessary due to the fact that in some circumstances the HMM would generate an initial rhythm with probability $0$ for all subpopulations within the BMM, resulting in a score of $\log 0 = -\infty$ (within NumPy). Although this is strictly speaking a correct score, if a rhythm and all its adjacent rhythms are impossible then the refinement algorithm will converge at that point, as the local score gradient will be $0$. As a correction to ensure that the model is able to correctly converge to a valid rhythm, it is necessary to introduce a gradient to the probability function such that impossible rhythms have a lower score than ``less impossible'' rhythms. This modified probability function is defined as:
 	$$B^*(\delta,\alpha_{i,j},\beta_{i,j},p_{i,j}^{(k)}) =
 	\begin{cases}
-		B(\delta,\alpha_{i,j},\beta_{i,j},p_{i,j}^{(k)}) & \text{if } B(\delta,\alpha_{i,j},\beta_{i,j},p_{i,j}^{(k)}) > 0 \textbf{ ,} \\
-		B_{min} \cdot 2^{-\delta} & \text{otherwise.}
+		B(\delta,\alpha_{i,j},\beta_{i,j},p_{i,j}^{(k)}) & \text{if } B(\delta,\alpha_{i,j},\beta_{i,j},p_{i,j}^{(k)}) > 0 \text{ ,} \\
+		(l+1)^{-(1 + \delta)} & \text{otherwise.}
 	\end{cases}$$
-	where $B_{min} = \frac{1}{l+1} < \min_{i,j} \left[ \frac{d_{i,j} - \beta_{i,j}}{\alpha_{i,j} - \beta_{i,j}} \right]$
+	where $l$ is the length in timesteps of a bar, meaning that $l^{-1} \leq p_{i,j}^{(k)}$ and so $(l+1)^{-(1 + \delta)} < B(\delta,\alpha_{i,j},\beta_{i,j},p_{i,j}^{(k)})$ in all cases. This ensures that no previously impossible distance has a higher score than any previously possible distance, while still introducing a working ``degree of impossibility'' measure. 
+	
+	The combination of the HMM with the distance model first uses the HMM to generate a bar of rhythm, and then uses the Greedy Max Cut algorithm \cite{rohde2002methods} to optimize that bar for a maximum combined score from the HMM and distance model. Specifically the aim is to find an approximation to:
+	$$ \max_{x_1,\dots,x_l} p_{HMM}(\{x_1,\dots,x_l\} | \{y_1,\dots,y_m\}) + \lambda \log p_{DIST}(\{y_1,\dots,y_m,x_1,\dots,x_l\}) \text{ ,} $$
+	where $\lambda$ is a constant value used to weight the relative importance of the distance measure against the HMM. Empirically I determined that higher values of $\lambda$ (I ultimately used $\lambda = 4.0$) yielded better results, as otherwise the HMM tended to overpower the distance measure.
 	
 	\subsubsection{Representation}
 	
@@ -522,7 +528,26 @@
 	
 	The HMM is impacted to a much greater extent due to the model's use of discrete states. As the timestep model for rhythms tends to contain many repeated patterns for each length of note, such as crotchets and quavers, the HMM tends to learn to repeat these patterns in sequence (with some possible variations). When the HMM learns one of these patterns however it requires a different state for every timestep in the pattern, so that the number of states in the HMM needed to learn the same rhythm has an inverse linear relationship with the length of a timestep. This also greatly increases the time taken for the HMM to converge during fitting and increases the probability of getting stuck in local minima or saddle point, which is a serious issue even with fairly large timesteps. 
 	
-	Finally the distance model is also affected by the timestep representation due to its use of Hamming distance. Taking the length of a quaver to be $n$ timesteps (and hence the length of a crotchet to be $2n$), the distance between 3 consecutive quavers and a quaver followed by a crotchet is always $1$, while the distance between 3 consecutive quavers and a quaver followed by a rest is $n$. As a result a shorter length of a timestep (and so the greater value of $n$) increases the distance between rests and notes while not increasing the distance between sustained notes and repeated notes. This is a difficult problem to overcome: the most logical way is to scale the distance between new notes and sustained notes, but this is essentially an arbitrary ratio that may not be fitting for all music. 
+	Finally the distance model is also affected by the timestep representation due to its use of Hamming distance. Taking the length of a quaver to be $n$ timesteps (and hence the length of a crotchet to be $2n$), the distance between 3 consecutive quavers and a quaver followed by a crotchet is always $1$, while the distance between 3 consecutive quavers and a quaver followed by a rest is $n$. As a result a shorter length of a timestep (and so the greater value of $n$) increases the distance between rests and notes while not increasing the distance between sustained notes and repeated notes. This is a difficult problem to overcome: the most logical way is to scale the distance between new notes and sustained notes, but this is essentially an arbitrary ratio that may not be fitting for all music (as is the unscaled value). 
+	
+	\subsubsection{Combined Model}
+	
+	When combining the two models for pitch and rhythm, it is important to note that pitch and rhythm in a song are not independent. There are many features of pitch that are typically affected by rhythm and vice versa, such as staccato notes generally being higher pitch or the tonic being held for longer at certain times. In this particular case achieving a two-way feedback process would have required large changes to the rhythm model and likely decreased generative performance significantly. Therefore the rhythm model feeds into the pitch model but not vice versa, as the pitch model already has some representation for rhythm.
+	
+	The algorithm for creating a full melody first uses the rhythm model to generate a suitable rhythm. Then the ANN in the pitch model is used to create the pitch sequence according to the rhythm. This is accomplished by altering the output values from the ANN before they are fed back to the input nodes or recorded into the output melody. The modifications to the output values are as follows:
+	\begin{itemize}
+		\item If the current timestep is a new note, leave the pitch unmodified and set $\mathbf{new note} \leftarrow 1$
+		\item If the current timestep is a sustained note, set the output pitch equal to the currently playing note and set $\mathbf{new note} \leftarrow 0$
+		\item If the current timestep is a rest, set the output pitch as empty and set $\mathbf{new note} \leftarrow 0$
+	\end{itemize}
+	This gives an output from the ANN that is accurate to the rhythm used to generate it and is fully consistent with the behaviour of both models.
+	
+	\subsection{Elman Network with Chaotic Inspiration}
+	\label{sec:elman-implementation}
+
+	The second method I implemented was based on the Elman network with chaotic inspiration as described in section \ref{sec:coca-net}. Unlike the previous algorithm this implementation was much more similar to the actual model described in the literature, and so does not merit the same degree of explanation as the majority of the details are explained in the previous chapter. 
+	%TODO: But obviously actually add some stuff here; the chaotic inspiration probably
+	
 
 	\backmatter
 	
