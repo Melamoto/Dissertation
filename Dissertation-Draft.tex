@@ -418,10 +418,6 @@
 	
 	In this chapter the requirements and objectives of the algorithm being sought are covered, and an in-depth design of the algorithms chosen is presented along with the details of their implementation.
 	
-%	\section{Objectives}
-%	
-%	The primary goal of this research is to explore the potential of integrating modern AI methods into the process of human musical composition. Thus it was not only necessary to investigate the AI algorithms themselves, but also their place within a human composer's work environment. The justification for this step is clear - an AI capable of performing or assisting only with tasks that are already trivial adds very little utility. It is therefore necessary as a preliminary step to identify the specific compositional tasks that will receive the greatest positive impact from the introduction of automation.. 
-	
 	\section{Design}
 	
 	The algorithm being selected and adapted for this project is intended to fulfil the goals discussed in \ref{sec:project-aims}, but these stated aims leave a huge degree of room for the implementational details of the algorithm. As touched on in section \ref{sec:abstract-methods}, there are many different ways to perform algorithmic composition, and the ``ideal'' method is entirely dependent on the exact requirements of the user. In this section these requirements are detailed and a pair of algorithms that satisfy them are given. 
@@ -439,70 +435,32 @@
 	Additional features such as modelling human-like imperfections in performance or musical dynamics were considered, but deemed to be tertiary to the core goals of the algorithm. This and the above comprised the basic functional requirements for the algorithm. These requirements still leave a great deal 
 	open about the algorithm, both in its implementation details and exactly how its success in imitating a style and producing coherent output is measured.
 
-	\subsection{Choice of Algorithms}
+	\subsection{Algorithm Selection}
+	\label{sec:algorithm-selection}
 	
 	One of the most promising avenues from the outset appeared to be evolutionary algorithms, although they did not prove ultimately suitable. The main advantage of EAs in music is that they search the space of possible melodies by assigning a fitness score to each melody that they consider; this is trivially made into a user-driven selection process by allowing the user to assign fitness scores, ensuring that higher quality melodies are successfully selected for. This method has some unfortunate drawbacks however, with the first and foremost being that EAs typically attempt an enormous number of solutions before reaching a passable solution, especially when working in a large domain with many dimensions such as melodies. This results in an unacceptable level of fatigue being inflicted on the user rating the melodies. There have been numerous attempts to overcome this problem, using methods such as clustering similar results to avoid presenting the user with many similar melodies \cite{burton1998hybrid,ralley1995genetic}, or trying to minimize the number of evolutionary iterations \cite{marques2010interactive}. While these methods do show some promise, it is still a substantially difficult task to compose a melody of sufficient quality with a small enough time and interaction count to be appropriate for this task.
 
 	Focusing instead on the user-facing constraints of the problem suggests that the ideal algorithm would be one that performs generation quickly and at most relies on explicit user input to refine suitable results, not as a lynchpin of the generative process. The best candidates for this are the supervised learning techniques previously discussed in section \ref{sec:supervised-learning}, which learn features of melodies from a training corpus and use this model to create new melodies in the same style. This allows for rapid creation of quality work, as the majority of computation is performed prior to the generation step. In particular the two most commonly used learning techniques in algorithmic composition are hidden Markov models and recurrent neural networks. These structures are designed for learning prediction models over sequential data, and can be designed to write new music by predicting the next note at a given point in time. 
 	
-	Given that the focus of the algorithm's design is melodic composition, it was preferable to focus on techniques that specialize in this area; within the realm of supervised learning this would logically imply ANNs (\ref{sec:anns}). Although there exist other suitable techniques, such as rule-learning models (\ref{sec:knowledge-systems}) and HMMs (\ref{sec:markov-models}), uses of these techniques in the literature are generally focused on harmonization and counterpoint tasks rather than monophonic melodic composition. 
+	There are some trade-offs between a supervised learning approach and a knowledge-based approach. One of the most significant advantages of supervised learning is that it is far more versatile, as it does not require any kind of hand-encoded knowledge. This is vital for an application that is intended as a generic tool for composers, as it must be able to write virtually any style of music - an infeasible goal with an entirely hand-written set of rules. It does however often suffer from an inability to learn long-term patterns very well; the general technique for using supervised learning to compose music is to predict notes as sequential data. This usually gives good results over the short term, but fails to learn relationships between distant patterns. In this particular case however, the presence of the user can mitigate this weakness by providing relevant long term features as input to the algorithm, while the issue of versatility can only be overcome if the user provides a their own set of constraints to write their songs with. Given that one of the goals in this work was to minimize the amount of work on the part of the user, it was a natural decision to user supervised learning. As a point of interest there do exist supervised learning models that learn rules from a corpus of data, potentially satisfying the major issues at hand, but it is an infrequently used technique that has not thus far have been used for melodic composition. 
 	
-	\section{Midi Data}
+	Given that the focus of the algorithm's design is melodic composition, it was preferable to focus on techniques that specialize in this area; within the realm of supervised learning this would logically imply ANNs (\ref{sec:anns}). Although there exist other suitable techniques, such as rule-learning models (\ref{sec:knowledge-systems}) and HMMs (\ref{sec:markov-models}), uses of these techniques in the literature are generally focused on harmonization and counterpoint tasks rather than monophonic melodic composition. There are many ways to use ANNs for composition, such as a fitness function for some optimizing algorithm \cite{manaris2007corpus} or as part of a constraint architecture \cite{hild1992harmonet}. However ANNs have been chosen here for specific reasons (i.e. fast run-time and versatility) that will be best satisfied by a more pure approach. %TODO Don't forget to give those justifications properly before this point
+	
+	Of the algorithms that were reviewed, two appeared to be well-suited to the task. These algorithms were both fairly simple implementations of RNNs, each using a relatively basic melody generation algorithm that featured no cumbersome or overly complex architecture. This ensured a good generation speed and a straightforward training process, as well as a high degree of versatility - as is typical for ANNs. The algorithms are detailed below in \ref{sec:implementation}, including references to the base algorithms as well as the modifications introduced within this work.
+	
+	\section{Musical Data}
 	\label{sec:midi-data}
-%	
-%	One of the key details that sets the intended method apart from most other algorithmic composition methods is its purely cooperative nature. This allows for a major performance benefit by offloading a certain portion the work to the human operator. There are three major places in which this offloading can take place: initializing state before generation, guiding the generation process, and adjusting the final generated output. The first is achieved by using the score written by the user as input to create new material from. The third is an intrinsic part of the process, as the final output of the algorithm is provided to the user to be used as they please. The second may be exploited to improve the performance of the algorithm in generating output that is useful or pleasing to the user.
 	
-	%Out of the wide range of algorithms used in algorithmic composition, the best suited to interactive composition of this variety are evolutionary algorithms (EAs). This is due to their use of a fitness function over a sample population; it is possible to augment the fitness assignment process by allowing the user to provide their preferences as an input to determine each sample's fitness. A number of EAs have been designed with this behaviour in mind in order to overcome the challenge of defining an objective fitness function. This method has the major drawback that it typically causes a large amount of fatigue to the user - providing a rating to each sample once for each generation is a prohibitively large task for a human. To overcome this, it is generally attempted to minimize the population size and number of generations presented to the user, often by querying the user for input over a small subset of fitness evaluations. 
+	As both of the algorithms implemented here use supervised learning, it was necessary to train them with a set of data. This application is concerned only with the purely melodic aspects composition as opposed to dynamics or timbre, therefore only the musical score is required as input. This requirement is best satisfied by the MIDI format (\ref{sec:midi}), which directly encodes scores. This is also a convenient choice due to the availability of many useful libraries that provide functions for reading, writing, and manipulating MIDI data. 
 	
-%	There are a number of ways that this effect could be achieved. One would be the use of evolutionary algorithms. Due to their use of a fitness function to guide their search through the solution space, it is simple and straightforward to integrate user feedback into the EA by using user rating - either as the fitness function, or as some kind of augmentation to the fitness assignment process. A number of EAs have been designed with this behaviour in mind in order to overcome the challenge of defining an objective fitness function. This does however suffer a major drawback in that it is not feasible for an individual user to guide the search process single-handedly; due to the large number of samples that must be judged, user fatigue rapidly becomes a critical constraint. There have been attempts to mitigate this effect through various means, such as reducing the population, number of generations, or novel methods such as using clustering to avoid presenting the user with similar outputs. These methods each present their own limitations however, to an extent that was prohibitive in the case of this research project. 
-
-	%% TODO: Explain and justify choice of algorithm									
+	One unfortunate difficulty involved with using MIDI data, however, is availability. Due to the limited range of sound produced by MIDI synths, such as Microsoft's GS Wavetable SW Synth, it is not a popular format for storing or listening to music with. Because of this it is typically much harder to obtain a MIDI version of a song than a traditional audio recording. Furthermore this problem is particularly exaggerated for genres of music that place emphasis on timbre, such as metal or electronic dance music, making it much harder to train a model with music from those genres. 
 	
-	%\subsection{Musical Fitness}
-	%\label{sec:fitness}
+	To avoid this problem within the course of this project, all training data was manually inscribed. The particular music used for testing was a set of nursery rhymes, chosen for a combination of their simplicity and relative musical similarity. It is common for the number of songs used for training and testing composition algorithms to be fairly small; often fewer than 20 and almost always fewer than 100. This is due to the difficulty in obtaining songs as well as the high complexity of each individual song leading to a reduced need for more data.
+		
+	\section{Algorithm Implementation}
+	\label{sec:implementation}
 	
-	%It is accurate to state that the EA is primarily defined by its fitness function: although choice of parameters and initial population may improve the rate at which it approaches an optimal solution, it is the fitness function that defines the optimal solutions. Because of this it is necessary to select a fitness function that will favour good results and prune bad ones. On an objective level this is completely infeasible if not impossible to achieve, hence the need for user intervention to guarantee a good result. Instead a more accurate (if quite abstract) goal for the fitness function should be to minimize the number of bad results presented to the user and adapt well to the user's direction. 
-	
-	%Through a review of the available literature I have determined that one of the best suited fitness functions to this task is the ARTMAP neural network fitness evaluator \cite{burton1998hybrid}. The main advantages to this method are its ability to adapt to a varied training set, its defined use of user input to direct the search process, and its inherent ability to detect similar patterns - thus preventing the user from being presented with the same results repeatedly. As a supervised learning technique it is necessary to provide a selection of training data
-	
-	%\section{Population Generation}
-	%\label{sec:pop-gen}
-	
-	%The choice of generation algorithm for the initial population of an EA can have a major impact on that EA's overall performance. An EA with a heuristic that generates a good set of initial solutions can achieve an ideal solution several orders of magnitude faster than an EA that uses a random starting population. This effect is particularly enhanced in scenarios where the output domain is very large while the percentage of good solutions is very small, as is very much the case with musical scores. A simple heuristic for generating approximately feasible melodies does not exist however; in the domain of music finding an approximately good solution is often approximately as difficult as finding a good solution. It is therefore necessary to use an additional algorithmic composition method for the purposes of generating a starting population.
-	
-	%This method will need to satisfy several requirements to be viable as a population generator:
-	
-%	\begin{itemize}
-%		\item It must have a high run-time speed, as it will need to generate a large number of possible solutions before the EA can begin.
-%		\item It must be able to produce many different outputs for the same input, as the population must have variance for the search to be efficient.
-%		\item It must be non-interactive in order to not add to the user's fatigue, due to the presence of fatigue as a constraining factor on the EA's performance.
-%		\item It must build its solutions off of the score already produced by the user in order for its output to be relevant to the EA.
-%	\end{itemize}
-	
-	%The first requirement implies the use of a technique that uses prior-obtained knowledge to find a solution rather than performing a broader search as with an EA. Two of the most effective and well-documented ways to achieve this are handcrafted knowledge-based systems (\ref{sec:knowledge-techniques}) and supervised learning (\ref{sec:supervised-techniques}). In the former case it is necessary to compose a set of rules and/or constraints that will provide good output for the user's choice of input; this is difficult as these types of techniques are known to be brittle and not very versatile.	In particular most effective rulesets only perform well for specific genres, which prohibits creating a generalist system. Supervised learning on the other hand has the advantage of being versatile and adaptable based on the type of data being worked with. It is also convenient in this case as it is possible to use data already obtained for training the EA's fitness function (\ref{sec:fitness}).
-	
-	%I reviewed a variety of supervised learning techniques that could be applied effectively to this task. The majority of documented methods use either recurrent neural networks or hidden Markov models trained on a set of melodies. The main advantage of these techniques with regard to composition is that they are effective at extracting features from sequential data consisting of predictable patterns. However, they also tend to be ineffective at representing coherent long-term patterns or understanding non-immediate context, which limits their overall use in composition. Fortunately this shortcoming is partially offset in this scenario by the fact that a skilled human composer will make modifications to the output from this stage as they direct the EA. Because of this it is not necessary for the population generator's output to fully account for certain long-term features, provided that it produces a reasonable variety of good material.
-	
-%	\subsection{Training}
-%	
-%	Providing training data for the AI to learn from is potentially a non-trivial task. The reason for this is that the data must fulfil a certain set of constraints, namely:
-%	
-%	\begin{itemize}
-%		\item The data must be stored in a machine-readable format
-%		\item The input must not contain any features that the AI is not capable of parsing
-%		\item There must be a strong degree of consistency within the data so that the learned patterns are coherent
-%	\end{itemize}
-%	
-%	The format used to store music throughout this project is the Midi file format \cite{swift1997brief}, which stores music in the form of notes and events instead of sound. This is ideal for this application, as it allows for direct recovery of the exact musical elements contained within each piece of music, a significantly more challenging task when dealing with raw audio. It is also convenient for data acquisition as there exist various large collections of royalty-free midis available to the public. Unfortunately these midis are very often classical music of some variety which often fails to satisfy the second requirement.
-%	
-%	The second requirement is one of the most constricting, as for various reasons the AI has many restrictions on the type of musical data it can work with. %TODO: Definitely reference back on this point
-%	The most harmful of these is the inability to parse or generate polyphonic melodies. This causes some major issues when working with orchestral or piano music due to their frequent use of many melodic lines and chords respectively, which excludes most available classical music. Although it is in some cases possible to isolate a single melodic line, there are quite often no such lines that are both long and substantial enough to be useful for training.
-%	
-%	To best overcome these restrictions, the data used was a selection of nursery rhymes transcribed for this research. These have the advantage of being relatively simple and sharing many commonalities such as key and meter, making it much easier for the AI to identify and recreate patterns. They are also universally monophonic due to their vocal nature.
-%	
-%	\section{Development Platform}
-	
-	\section{Implementation}
+	The two algorithms that were implemented and tested for this work are explained in detail in this section; reference is made to the original algorithms from which they are derived, and the modifications made as part of this research are explained in detail. 
 	
 	\subsection{Jordan Network with Hidden Markov Model and Distance Measure}
 	\label{sec:jordan-implementation}
@@ -696,9 +654,9 @@
 	
 	\subsubsection{Results for HMM}
 	
-	The HMM was tested with increasing numbers of iterations $i_H$ for each number of hidden states $s$ up until the model was able to consistently reach convergence. The number of iterations needed to reach convergence for each value of $s$ is recorded in figure \ref{fig:hmm-iterations-convergence}.
+	The HMM was tested with increasing numbers of iterations $i_H$ for each number of hidden states $s$ up until the model was able to consistently reach convergence. The number of iterations needed to reach convergence for each value of $s$ is recorded in figure \ref{fig:hmm-iterations-convergence}. An interesting feature of this relationship is that the number of iterations is minimal at $h = 24$ and increases as the number of states rises or falls. This is due to the fact that as the number of states decreases it become more difficult to accurately fit to the dataset, meaning a greater number of iterations is needed to find a stable fitting. Increasing the number of states also increases the number of iterations to convergence due to the increased complexity of the model being fitted.
 		
-	\begin{figure}[hl]
+	\begin{figure}[h]
 		\centering
 		\includegraphics[width=0.4\textwidth]{filler}
 		\caption{Number of iterations required for convergence by number of hidden states in HMM}
@@ -737,24 +695,27 @@
 	
 	\begin{table}[htp]
 		\begin{center}
-			\begin{tabular}{cc}
-				$c$ & $\lambda$\\
+			\begin{tabular}{ccccc}
 				\toprule
-				$3$ & $0.25$\\
-				& $0.5$\\
-				& $1$\\
-				& $2$\\
-				& $4$\\
-				$5$ & $0.25$\\
-				& $0.5$\\
-				& $1$\\
-				& $2$\\
-				& $4$\\
-				$8$ & $0.25$\\
-				& $0.5$\\
-				& $1$\\
-				& $2$\\
-				& $4$\\
+				& & \multicolumn{3}{c}{Bars}\\
+				\cline{3-5}
+				$c$ & $\lambda$ & $1$ & $2$ & $4$\\
+				\hline
+				$3$ & $0.25$ & $-$ & $-$ & $-$\\
+				& $0.5$      & $-$ & $-$ & $-$\\
+				& $1$        & $-$ & $-$ & $-$\\
+				& $2$        & $-$ & $-$ & $-$\\
+				& $4$        & $-$ & $-$ & $-$\\
+				$5$ & $0.25$ & $-$ & $-$ & $-$\\
+				& $0.5$      & $-$ & $-$ & $-$\\
+				& $1$        & $-$ & $-$ & $-$\\
+				& $2$        & $-$ & $-$ & $-$\\
+				& $4$        & $-$ & $-$ & $-$\\
+				$8$ & $0.25$ & $-$ & $-$ & $-$\\
+				& $0.5$      & $-$ & $-$ & $-$\\
+				& $1$        & $-$ & $-$ & $-$\\
+				& $2$        & $-$ & $-$ & $-$\\
+				& $4$        & $-$ & $-$ & $-$\\
 				\bottomrule
 			\end{tabular}
 		\end{center}
