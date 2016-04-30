@@ -28,7 +28,10 @@
 	\makedecl
 	
 	\tableofcontents
-	\lstlistoflistings
+	\listoffigures
+	\listoftables
+	\listofalgorithms
+	\lstlistoflistings	
 	
 	% -----------------------------------------------------------------------------
 	
@@ -74,8 +77,6 @@
 	
 	\chapter{Contextual Background}
 	\label{chap:context}
-	
-	\section{Overview}
 	
 	Algorithmic composition is an Artificial Intelligence (AI) problem concerning the creation of music via some algorithmic process. It is currently one of the topics at the forefront of the greater study of \textit{computational creativity}: the challenge of designing an AI that displays, according to some agreeable definition, creativity. This can be described in another way as algorithmically mimicking various aspects of human intelligence, particularly relating to the conception of novel solutions to problems. The arts are a particular subject of interest for this research, as they are widely considered to be highly creative and distinctly human.
 	
@@ -561,7 +562,9 @@
 	\chapter{Critical Evaluation}
 	\label{chap:evaluation}
 	
-	\section{Testing Process}
+	In this chapter, the algorithms described in the previous chapter are assessed on their ability to generally model music as well as their value as an assistant to a human composer. 
+	
+	\section{Testing Outline}
 	
 	For each of the tested algorithms described in the section above, a pair of tests were performed. The first set of tests were objective tests designed to estimate the effect on performance of varying the parameters to the algorithm. Essentially the goal of this stage was to determine the optimal performance state for each algorithm, and as such the exact details of the tests were different (to a limited extent) for each algorithm - this was not problematic at all as no cross-comparison was taking place. The second set of tests was a subjective evaluation of the algorithms, designed to test their performance in a compositional context. These tests were performed identically for each algorithm and provided them with a ranking as well as an overall quality assessment. 
 	
@@ -570,7 +573,7 @@
 	
 	The objective tests were based heavily on a simple test that has been used many times before in existing literature \cite{todd1989connectionist,franklin2006recurrent,paiement2007generative}: the ability to learn a song exactly and recreate it from memory. In this particular case the models were trained on a set of $13$ musical pieces and attempted to recreate each. Notably for this task the testing set is not separated from the training set; this is by design, as the goal of the model is to learn the features of the songs - it would be completely infeasible for any model to be expected to accurately recreate a song it has never seen before. Naturally this test is well-suited to supervised learning models and poorly suited to others, which is acceptable in this case. This test is an imperfect way to assess algorithmic composition in general; it does not select for many of the positive cases, in which an algorithm produces consistently good but original content, and it also selects for negative cases such as when the algorithm overfits to the training set and only ever recalls exact melodies it has previously seen. It does, however, serve as a good indicator that a model is at least capable of modelling music to a limited extent, which is an acceptable basis for more in-depth testing.
 	
-	Some of the factors that affect the outcome of the test are the number of training iterations used, the size and complexity of the training set, and the parameters of the model. Given that the goal is to fit to the data as closely as possible, a larger number of iterations can always be expected to result in an improvement in the resulting model. It is still a point of interest however to examine the number of iterations needed to achieve an ideal or close-to-ideal result, as this will affect the amount of time required to train the model, which has an important impact on its value as a tool. The choice of training data may affect different algorithms in different ways, depending on how performant that algorithm is within the particular genre being used. As an example, a model that has trouble fitting to complicated rhythms will likely perform much better on rock n' roll than jazz. 
+	Some of the factors that affect the outcome of the test are the number of training iterations used, the size and complexity of the training set, and the parameters of the model. Given that the goal is to fit to the data as closely as possible, a larger number of iterations can always be expected to result in an improvement in the resulting model. It is still a point of interest however to examine the number of iterations needed to achieve an ideal or close-to-ideal result, as this will affect the amount of time required to train the model, which has an important impact on its value as a tool. The choice of training data may affect different algorithms in different ways, depending on how well that algorithm performs within the particular genre being used. As an example, a model that has trouble fitting to complicated rhythms will likely perform much better on rock n' roll than jazz. 
 	
 	\subsubsection{Testing Protocol}
 	
@@ -581,7 +584,6 @@
 		\item For each combination of test sets, models, parameters, and training iterations:
 		\begin{enumerate}
 			\item Train a model on the test set using the given parameters for the given number of training iterations.
-			\item Record the time taken to train the model.
 			\item Have the trained model attempt to complete the last 1, 2, and 4 bars of each piece in the training set.
 			\item Record the distance between the model output and the corresponding original fragment.
 		\end{enumerate}
@@ -601,9 +603,13 @@
 	
 	In the case of this particular research topic however, the goal is not to determine an algorithm capable of human-like creativity, but one that can produce material to assist human creativity. The difference in this case is subtle but important. As an example, consider an algorithm that produced excellent musical material with the exception of adding a totally random note once every bar: This would be trivially distinguishable from a human's work, as the random notes would often appear to completely clash with the rest of the melody in a way that few humans would consider acceptable. It would however be perfectly useful as material for a composer, as the presence of the occasional random notes would not diminish the musical quality of the remaining content. Therefore the best way to approach the subjective testing is not from a listener's point of view, but a composer's.
 	
-	The outline of this test is quite straightforward: a composer is asked to compose 6 bars of an original 8 bar piece (not necessarily the first 6 bars), in a style reasonably consistent with the music used to train the model being tested. Following this, the model algorithmically generates a set of several possible completions for melody. The composer selects one of these outputs to fill in the song with, and then makes modifications to it until they are satisfied with the resulting piece. This process is repeated for each algorithm being tested, as well as an additional algorithm used as a control that generates random monophonic melodies (within appropriate constraints). The metric tested for is an edit distance measure between the original output of the algorithm and the final version edited by the composer. The motivation for this metric is that edit distance forms an accurate indicator of the amount of work needed to obtain a useful result from the initial piece. 
+	The outline of this test is quite straightforward: a composer is asked to compose 6 bars of an original 8 bar piece (though not necessarily the first 6 bars), in a style reasonably consistent with the music used to train the model that is being tested. Following this, the model algorithmically generates a set of several possible completions for melody. The composer selects one of these outputs to fill the empty bars with, and then makes modifications to it until they are satisfied with the resulting piece. This process is repeated for each algorithm being tested, as well as an additional algorithm used as a control that generates random monophonic melodies (within appropriate constraints).
+	
+	The metric tested for is an edit distance measure between the original output of the algorithm and the final version edited by the composer. The motivation for this metric is that edit distance is an approximate indicator of the amount of work needed to transform one piece into another. It is clearly not a perfect representation of the work taking place as the mental process of composition is poorly understood and far more complicated than can be captured in a simple objective test. In the absence of such a test, it is safer and more effective to use a direct measure of similarity and perform an additional level of analysis subjectively. There have been a few attempts at algorithmically determining musical similarity, some even being used themselves for algorithmic composition \cite{burton1998hybrid}; however, these methods have limited success and are generally unsuitable for this use case due to requiring training or more input data.
 	
 	%TODO: If an interactive element during generation is ultimately involved, include it as part of the test
+	
+	%TODO: Use orthogonal rhythm-pitch measures; stick to nice pure distance measures; include some in-depth analysis of properties such as mean not length
 	
 	\subsubsection{Testing Protocol}
 	
@@ -651,6 +657,8 @@
 	Distinctly absent from the training parameters is the convergence tolerance for the EM algorithms in both cases, $c_H$ and $c_D$, which is used to halt the algorithm when the rate of improvement per iteration falls below a certain threshold, i.e. the algorithm has converged. The reason for their absence is that the tolerance value for EM convergence has strict inverse proportionality to the success of the model, and so will be fixed at a sufficiently low value $c_H = c_D = 10^{-7}$ for all tests to ensure a fair comparison. Furthermore, not all iteration counts need be tested for a given model; if the EM algorithm consistently converges within a certain number of iterations then testing that model with any greater number of iterations is purely redundant. The number of iterations required for the distance model to converge is also sufficiently small that it can always be allowed to converge. 
 	
 	The values tested for each of the model parameters are $s = \{8,16,24,32,40,48,56,64,72\}$ and $c = \{3,5,8\}$, the tested iteration counts for training are $i_H = \{300, 500, 800, 1300, 2100, 3400\}$, and the values used for generation are $\lambda = \{\frac{1}{4},\frac{1}{2},1,2,4\}$, for a maximum possible total (depending on iterations needed for convergence) of 30 HMM tests and 15 distance model tests.
+	
+	%TODO: Table this stuff, for all sections
 	
 	\subsubsection{Results for HMM}
 	
@@ -856,8 +864,15 @@
 		\label{tab:elman-4-bar-results}
 	\end{table}
 	
+	\section{Subjective Results}
 	
+	In this section the results are given for the second stage of tests. These tests are reliant on a user feedback from a composer, and so the resulting testing process and analysis is slightly more complicated than in the previous batch of tests. In particular, the edit distance measure used to compare the original and modified melody fragments is an imperfect approximation of the actual effort required to derive one from the other. Because of this there will be some additional degree of subjective analysis focused on the similarity between the two fragments, in order to identify and explain any subtleties or notable features that the distance measure misses. 
 	
+	\subsection{Jordan Model}
+	
+	The parameters used for the Jordan model were $s = 5$, $c = 5$, $\lambda = 5$, $h = 5$, and $e = 5$. 
+	
+	\subsection{Elman Model}
 	
 
 % -----------------------------------------------------------------------------
