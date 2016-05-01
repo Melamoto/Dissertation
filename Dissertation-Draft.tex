@@ -110,10 +110,6 @@
 	\label{sec:tech-in-music}
 	
 	As detailed above, there has been a substantial amount of work invested into algorithmic composition up to this point. It is of notable importance that the vast majority of this work has developed from academic interest only, with very little direct involvement from industry towards the problem (and many of the companies that are involved emerged directly from academia). The cause for this is easily identifiable: there are few current financial incentives to pursue algorithmic composition. Although a high quality artificial composer would certainly be a valuable asset, technology is recognizably quite far away from achieving something effective enough to put to market with a high expected return on investment. This slows down the rate of progress in the study of algorithmic composition, and quite possibly computational creativity as a whole; while current research is going strong, the problem being tackled is immense and the resources available comparatively small. 
-%	
-%	The financial incentive for investment in algorithmic composition given the reasonable possibility of achieving success is also quite evident. The music industry is currently valued at over \pounds 10.0 billion globally \cite{smirke2015global}, with the UK retail value worth over \pounds 900 million \cite{riaj2015global}. Any kind of new technology capable of providing a fundamental boon to production is therefore of high value. 
-	
-	% Traditional Composition stuff
 	
 	In modern times, technology has served to greatly augment the compositional process. The invention of the 
 	analogue synthesizer and its subsequent rise to widespread popularity in the 1960s-1970s provided a powerful new tool to composers. This electronic instrument not only produced a unique sound unlike any traditional acoustic instruments, but proved highly versatile during composition due to the ability to synthesize sounds similar to different instruments. This functionality began to reach its true potential in the early 1980s, as polyphonic electronic keyboards incorporating many different sounds as part of their hardware began to enter popular use. This single piece of equipment gave individual producers the ability to both compose and perform each part of an entire multi-instrumental score by themselves. These advancements began to peak with the invention of software synthesizers and the MIDI format (see \ref{sec:midi}), imbuing a computer with the power to fully score and synthesize virtually any kind of music. These advances have had enormous consequences for the world of music, as it has become possible for any individual with access to an inexpensive digital workstation to create, perform, and distribute music that would have required an entire orchestra or even been impossible to create otherwise.
@@ -179,7 +175,7 @@
 		\item Evolutionary algorithms
 		\item Hybrid models
 	\end{itemize}
-	Each one of these categories carries its own set of advantages and disadvantages which greatly influence the type of output it produces. Although these categories are not restricted in the types of compositional tasks that they can perform, different techniques may result in completely different uses for the resulting AI. Examples of these different categories, some of the techniques that comprise them, and their strengths and weaknesses follow.
+	Each one of these categories carries its own set of advantages and disadvantages which greatly influence the properties of the output it produces. Although techniques from each of these categories can be used for almost any kind of compositional task, different techniques may result in completely different behaviour from the resulting AI. In particular there is a great diversity in the type of input used by algorithms to generate music, which has a large impact on their usability for certain tasks. 
 	
 	\subsection{Knowledge-Based Models}
 	\label{sec:knowledge-systems}
@@ -237,6 +233,8 @@
 			draw=none,
 			fill=none,
 		},
+		dot/.style={draw,shape=circle,minimum size=3pt,inner sep=0,fill=black
+		},
 		net/.style={
 			matrix of nodes,
 			nodes={
@@ -256,35 +254,55 @@
 			& |[plain]| & \\
 			|[plain]| & \\
 			& |[plain]| & \\
-			|[plain]| & |[plain]| \\
-			& & \\
-			|[plain]| & |[plain]| \\
+			|[dot]| & & |[dot]| \\
+			|[dot]| & |[plain]| & |[dot]| \\
+			|[dot]| & & |[dot]| \\
 			& |[plain]| & \\
 			|[plain]| & \\
 			& |[plain]| & \\
+			|[plain]| & & |[plain]| \\
+			& |[plain]| & |[plain]| \\
+			|[plain]| & & |[plain]| \\
+			& |[dot]| & |[plain]| \\
+			|[dot]| & |[dot]| & |[plain]|\\
+			|[dot]| & |[dot]| & |[plain]| \\
+			|[dot]| & \\
+			& |[plain]| & |[plain]| \\
 		};
-		\foreach \ai [count=\mi ]in {2,4,6}
+		%Input arrows
+		\foreach \ai [count=\mi ]in {2,4}
 			\draw[<-] (mat-\ai-1) -- node[above] {Pitch \mi} +(-2cm,0);
-		\foreach \ai [count=\mi ]in {8,10}
+		\draw[<-] (mat-8-1) -- node[above] {Pitch $p$} +(-2cm,0);
+		\foreach \ai [count=\mi ]in {12,14}
 			\draw[<-] (mat-\ai-1) -- node[above] {Plan \mi} +(-2cm,0);
-		\foreach \ai in {2,4,6,8,10}
-			{\foreach \aii in {3,6,9}
+		\draw[<-] (mat-18-1) -- node[above] {Plan $n$} +(-2cm,0);
+		\foreach \ai [count=\mi ]in {10}
+			\draw[<-] (mat-\ai-1) -- node[above] {New Note} +(-2cm,0);
+		% Input -> Hidden
+		\foreach \ai in {2,4,8,10,12,14,18}
+			{\foreach \aii in {3,5,7,9,11,13,17}
 				\draw[->] (mat-\ai-1) -- (mat-\aii-2);
 			}
-		\foreach \ai in {2,4,6,8,10}
+		% Input -> Input
+		\foreach \ai in {2,4,8,10}
 			{\foreach \aii in {3,6,9}
-				\draw[->] (mat-\ai-1) edge[loop right] (mat-\aii-2);
+				\draw[->,line width=0.3mm] (mat-\ai-1) edge[loop right] (mat-\aii-2);
 			}
-		\foreach \ai in {3,6,9}
-			{\foreach \aii in {2,4,6,8,10}
+		% Hidden -> Output
+		\foreach \ai in {3,5,7,9,11,13,17}
+			{\foreach \aii in {2,4,8,10}
 				\draw[->] (mat-\ai-2) -- (mat-\aii-3);
 			}
-		\foreach \ai [count=\mi ]in {2,4,6,8,10}
-			\draw[->] (mat-\ai-3) -- node[above] {Ouput \mi} +(2cm,0);
-		\foreach \ai in {2,4,6,8,10}
-			\draw[->] (mat-\ai-3) edge[bend left] (mat-\ai-1);
+		% Output arrows
+		\foreach \ai [count=\mi ]in {2,4}
+			\draw[->] (mat-\ai-3) -- node[above] {Pitch \mi} +(2cm,0);
+		\draw[->] (mat-8-3) -- node[above] {Pitch $p$} +(2cm,0);
+		\draw[->] (mat-10-3) -- node[above] {New Note} +(2cm,0);
+		% Output -> Input
+		\foreach \ai in {2,4,8,10}
+			\draw[->,line width=0.4mm] (mat-\ai-3) edge[bend left] (mat-\ai-1);
 		\end{tikzpicture}
-		\caption{An example of a variety of Jordan network}
+		\caption{The topology of Todd's network, with recurrent connections bolded}
 	\end{figure}
 	
 	The network is trained using standard backward propagation of errors with gradient descent. The training data is extracted from a set of songs by converting each song to the timestep format as described above, and providing them as input to the network. It is important to note that in traditional operation of the network, the only input to the input layer comes from the recurrent connections from the input layer and the output layer. However this leads to decreased performance during training, due to the fact that the input layer is receiving values from the output layer that are different to the expected output at that stage. Put simply, this means that instead of learning to map each timestep in the training song to the following timestep, the network learns to map the output from its current untrained state to the following timestep in the original song. This problem disappears as the network begins to converge and its actual output begins to match the expected output, but this can take a great deal of time as the training process is essentially chasing a moving target - the network is repeatedly trained to learn an incorrect mapping until it has converged enough to start learning the correct mapping. To overcome this problem, the training process eschews the recurrent connection from the output to input layers and instead directly provides the timesteps from the training song as input, allowing the network to start learning the ``real'' mapping immediately.
@@ -305,6 +323,8 @@
 			draw=none,
 			fill=none,
 		},
+		dot/.style={draw,shape=circle,minimum size=3pt,inner sep=0,fill=black
+		},
 		net/.style={
 			matrix of nodes,
 			nodes={
@@ -324,27 +344,53 @@
 			& |[plain]| & \\
 			|[plain]| & \\
 			& |[plain]| & \\
-			|[plain]| & |[plain]| \\
-			& & \\
-			|[plain]| & |[plain]| \\
+			|[dot]| & |[plain]| \\
+			|[dot]| & & \\
+			|[dot]| & |[plain]| \\
 			& |[plain]| & \\
 			|[plain]| & \\
 			& |[plain]| & \\
+			|[plain]| & |[plain]| & |[plain]| \\
+			& |[plain]| & \\
+			|[plain]| & |[plain]| & |[plain]| \\
+			& |[plain]| & \\
+			|[plain]| & |[plain]| & |[plain]| \\
+			& |[plain]| & \\
+			|[dot]| & |[plain]| & |[plain]| \\
+			|[dot]| & |[plain]| & \\
+			|[dot]| & |[plain]| & |[plain]| \\
+			& |[plain]| & \\
+			|[plain]| & |[plain]| & |[plain]| \\
+			& |[plain]| & \\
+			|[plain]| & |[plain]| & |[plain]| \\
+			& |[plain]| & \\
+			|[dot]| & |[plain]| & |[plain]| \\
+			|[dot]| & |[plain]| & \\
+			|[dot]| & |[plain]| & |[plain]| \\
+			& |[plain]| & |[plain]| \\
 		};
-		\foreach \ai [count=\mi ]in {2,4,6}
-		\draw[<-] (mat-\ai-1) -- node[above] {Pitch \mi} +(-2cm,0);
-		\foreach \ai [count=\mi ]in {8,10}
-		\draw[<-] (mat-\ai-1) -- node[above] {Plan \mi} +(-2cm,0);
+		% Input arrows
+		\foreach \ai [count=\mi ]in {2,4}
+			\draw[<-] (mat-\ai-1) -- node[above] {Pitches \mi} +(-2cm,0);
+		\draw[<-] (mat-8-1) -- node[above] {Pitches 7} +(-2cm,0);
+		\draw[<-,align=center] (mat-10-1) -- node[above] {Lower \\ Octave} +(-2cm,0);
+		\draw[<-,align=center] (mat-12-1) -- node[above] {Higher \\ Octave} +(-2cm,0);
+		\foreach \ai [count=\mi ]in {14,16}
+			\draw[<-] (mat-\ai-1) -- node[above] {Duration \mi} +(-2cm,0);
+		% Input -> Hidden
 		\foreach \ai in {2,4,6,8,10}
 		{\foreach \aii in {3,6,9}
 			\draw[->] (mat-\ai-1) -- (mat-\aii-2);
 		}
+		% Hidden -> Hidden
 		\foreach \ai in {3,6,9}
 			\draw[->] (mat-\ai-2) edge[in=150,out=30,loop] (mat-\ai-2);
+		% Hidden -> Output
 		\foreach \ai in {3,6,9}
 		{\foreach \aii in {2,4,6,8,10}
 			\draw[->] (mat-\ai-2) -- (mat-\aii-3);
 		}
+		% Output Arrows
 		\foreach \ai [count=\mi ]in {2,4,6,8,10}
 		\draw[->] (mat-\ai-3) -- node[above] {Ouput \mi} +(2cm,0);
 		\end{tikzpicture}
@@ -354,6 +400,12 @@
 	The representation of music used by this particular network is quite different to that used in \ref{sec:todd-net}. Most distinctly it does not use the timestep representation for the temporal dimension, but instead assigns a duration value to each event. This shares the disadvantage of only allowing monophonic input/output, but places a greater emphasis on learning the temporal features of the input data. This helps overcome some of the issues mentioned earlier with regard to the ``new note'' feature. The representation for the duration of a note is given as a binary string whose actual binary value represents the duration of the note. The conversion between numerical value and musical time is such that a crotchet (quarter note) has a duration value of 96. This is the exact value used by the MIDI standard (\ref{sec:midi}), chosen such that it can represent all standard note divisions (semiquavers, crotchet triplets and quaver triplets) as well as the small irregularities in timing that occur during live performance. 
 	
 	The pitch representation is also quite different, as there is no longer a one-to-one mapping of pitches to nodes. Instead, the pitch is split into two parts: the in-octave pitch and the octave. The representation for the octave is very simple and uses only 2 nodes, with the binary mapping $10 = \text{C2-B2}$, $01 = \text{C4-B4}$, and $00 = \text{C3-B3}$, with the network's output being snapped to the closest of these values. This can easily be extended to cover a wider range with a small increase in nodes, making this representation more versatile than the one used in Todd's design. The representation for the in-octave pitch is also split into two parts, based on intervals of 4 and 3 semitones (major and minor thirds). Each circle represents a set of pitches whose relative intervals are multiples of 4 and 3 for major and minor thirds respectively. A given note is then represented as a pair of binary strings length 3 and 4 representing the index of the circles it lies in. So for example, C is encoded as 1000 100, D is encoded as 0010 001, and E is encoded as 1000 010. This is a useful representation as it models relative pitch (for certain intervals), which is more relevant in most musical structure than absolute pitch, without some of the disadvantages imposed by purely relative pitch representation such as easily straying off-key. 
+	
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=1.0\textwidth]{circles-of-thirds}
+		\caption{The circle-of-thirds representation of pitch; the upper row circles contain intervals of major thirds, and the lower row minor thirds. Each pitch within a 12 semitone octave can be uniquely identified by a pair of circles.}
+	\end{figure}
 	
 	\subsubsection{Chaotic Inspiration}
 	\label{sec:chaotic-inspiration}
@@ -751,7 +803,7 @@
 	
 	The parameters involved with the HMM are not included in this section, as they have already been fixed. An important feature of the values being tested is that they have a close relation in performance impact. Networks with a larger number of hidden neurons typically require many more epochs to learn any valuable information, and additionally once the network reaches convergence additional epochs contribute nothing further. As a result there are some combinations of $h$ and $e$ which do not give results of any value; therefore instead of testing every combination of $h$ and $e$, a range of $e$ values will be tested for each value of $h$ to determine its worst and best performance, using the results from previous $h$ values to determine a viable starting point. 
 	
-	The values tested for the number of hidden neurons are $h = \{12, 24, 36, 48, 60, 72\}$, as this covers the likely range of useful values for a dataset of this size (estimated based on the literature \cite{todd1989connectionist}). The range of values that may be tested for the number of epochs are $e = \{5000, 8000, 13000, 21000, 34000, 55000, 89000, 144000\}$, chosen as a liberal estimate to the upper and lower bounds that may be required by the network. As previously mentioned testing for a particular $h$ value will cease if increasing the number of epochs has no apparent effect on results, so there is no issue with assuming a higher upper bound; it is important to set an upper bound of some kind however, as this work is intended to have practical implications and hence must obey time constraints that are at least semi-realistic.
+	The values tested for the number of hidden neurons are $h = \{12, 24, 36, 48, 60, 72\}$, as this covers the likely range of useful values for a dataset of this size (estimated based on the literature \cite{todd1989connectionist}). The range of values that may be tested for the number of epochs are $e = \{5000, 8000, 13000, 21000, 34000, 55000\}$, chosen as a liberal estimate to the upper and lower bounds that may be required by the network. As previously mentioned testing for a particular $h$ value will cease if increasing the number of epochs has no apparent effect on results, so there is no issue with assuming a higher upper bound; it is important to set an upper bound of some kind however, as this work is intended to have practical implications and hence must obey time constraints that are at least semi-realistic.
 	
 	\subsubsection{Results}
 	
@@ -795,7 +847,7 @@
 	
 	These parameters are identical to those used for the Jordan model's network, as they are both fundamentally similar; the main differences between the two are the representation, internal connectivity, and use of chaotic inspiration, none of which are influenced by model or training parameters. They do however introduce a large enough difference that the results from the Jordan model tests cannot be used, either as a substitute or to help guide the tests, for this model.
 	
-	The values tested for the number of neurons and the range of values tested for the number of epochs are $h = \{12, 24, 36, 48, 60, 72\}$ and $e = \{5000, 8000, 13000, 21000, 34000, 55000, 89000, 144000\}$, for the same reasons described in \ref{sec:objective-jordan}.
+	The values tested for the number of neurons and the range of values tested for the number of epochs are $h = \{12, 24, 36, 48, 60, 72\}$ and $e = \{5000, 8000, 13000, 21000, 34000, 55000\}$, for the same reasons described in \ref{sec:objective-jordan}.
 	
 	\subsubsection{Results}
 	
@@ -871,6 +923,8 @@
 	\subsection{Jordan Model}
 	
 	The parameters used for the Jordan model were $s = 5$, $c = 5$, $\lambda = 5$, $h = 5$, and $e = 5$. 
+	
+	
 	
 	\subsection{Elman Model}
 	
