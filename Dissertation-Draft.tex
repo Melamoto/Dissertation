@@ -211,11 +211,95 @@
 %	
 %	\subsection{Hybrid Systems}
 %	\label{sec:hybrid-systems}
+
+	\section{Artificial Neural Networks}
+	\label{sec:ann-overview}
+	
+	Artificial neural networks (ANNs) are a type of supervised learning model that attempt to emulate the behaviour of networks of neurons within the human brain, and are useful for their ability to learn approximations to functions that are difficult to model directly, particularly ones with large, complex inputs. As a result they are commonly used for challenging learning tasks such as pattern and sequence recognition or automated trading. This property naturally lends itself well to algorithmic composition, a problem that is well-established as being incredibly complex, and for which direct computation has proven largely unsuccessful. 
+	
+	\subsection{Network Topology}
+	
+	In essence an ANN is a form of graph consisting of several ordered collections of nodes, called ``layers,'' and weighted directed edges between these nodes from one layer to the next, called ``connections.'' The network operates by activations: Each time the network is activated a set of input values are fed into the network through the first layer, called the input layer, by sending each input value to a corresponding input node. These values propagate from each layer in the network to the next; each node sums the inputs it receives, calculates some function (commonly the standard logistic sigmoid function) of the sum, and propagates this value along all of its outbound connections, multiplying by the connection weight. This propagation continues through the network until it has reached the final layer, called the output layer, which is then read to find the output of the network.
+	
+	\begin{figure}[!ht]
+		\centering
+		\begin{tikzpicture}[
+		plain/.style={
+			draw=none,
+			fill=none,
+		},
+		dot/.style={draw,shape=circle,minimum size=3pt,inner sep=0,fill=black
+		},
+		net/.style={
+			matrix of nodes,
+			nodes={
+				draw,
+				circle,
+				inner sep=10pt
+			},
+			nodes in empty cells,
+			column sep=2cm,
+			row sep=-9pt
+		},
+		>=latex
+		]
+		\matrix[net] (mat)
+		{
+			|[plain]| \parbox{1.3cm}{\centering Input\\layer} & |[plain]| \parbox{1.3cm}{\centering Hidden\\layer} & |[plain]| \parbox{1.3cm}{\centering Output\\layer} \\
+			|[plain]| & & |[plain]| \\
+			& |[plain]| & \\
+			|[plain]| & & |[plain]| \\
+			& |[plain]| & |[plain]| \\
+			|[plain]| & & \\
+			& |[plain]| & |[plain]| \\
+			|[plain]| & & |[plain]| \\
+			& |[plain]| & \\
+			|[plain]| & & |[plain]| \\
+		};
+		%Input arrows
+		\foreach \ai [count=\mi ]in {3,5,7,9}
+			\draw[<-] (mat-\ai-1) -- node[above] {Input \mi} +(-2cm,0);
+		% Input -> Hidden
+		\foreach \ai in {3,5,7,9}
+			{\foreach \aii in {2,4,6,8,10}
+				\draw[->] (mat-\ai-1) -- (mat-\aii-2);
+			}
+		% Hidden -> Output
+		\foreach \ai in {2,4,6,8,10}
+			{\foreach \aii in {3,6,9}
+				\draw[->] (mat-\ai-2) -- (mat-\aii-3);
+			}
+		% Output arrows
+		\foreach \ai [count=\mi ]in {3,6,9}
+			\draw[->] (mat-\ai-3) -- node[above] {Output \mi} +(2cm,0);
+		\end{tikzpicture}
+		\caption{An example feedforward (non-recurrent) ANN}
+	\end{figure}
+	
+	One particular variation of the typical ANN topology that holds a great deal of significance is the recurrent neural network (RNN). This type of network contains recurrent connections that are directed backwards through the network layers (or from a layer to itself). These connections do not propagate values during an activation in the same way as ordinary connections, but instead carry the values through to the next activation; this effectively gives the network a form of memory, as the receiving nodes receive inputs from the previous activation. There are many possible ANN constructions, such as Adaptive Resonance Theory networks which contain two layers fully connected to each other and are used for recognition or prediction tasks, but in this paper only simple RNNs will be discussed.
+	
+	\subsection{Training}
+	
+	As with any supervised learning model, ANNs must be trained on a dataset in order to be useful. In the case of ANNs specifically, each dataset used for training is composed of a set of inputs and corresponding outputs, which map to the input and output layers of the ANN respectively. The actual act of training an ANN is performed by adjusting the weights of the connections in the ANN so that the input values of the dataset are approximately mapped to the correct output when activating the ANN. One of the most common ways of achieving this is a technique called ``backward propagation of errors,'' or backpropagation.
+	
+	The backpropagation algorithm is a form of optimization method, where the objective is to minimize the output error of the ANN being trained. This error is calculated by activating the ANN with a test input, then calculating the difference between the ANN's output and the correct output as a derivative of the connection weights in the network. These error values are then used to adjust the weights of the connections via gradient descent (or some similar method). This is repeated for a number of epochs, with the ANN moving towards a more accurate model of the target function each time. As with most optimization-based learning algorithms, this process is vulnerable to becoming stuck in local minima. It can therefore be effective in certain cases to retrain a network several times and select the best performing as the final model.
+	
+	\section{Markov Models}
+	
+	Markov models are another class of supervised learning method, which attempt to model sequential data as a stateful stochastic process without memory. Although there are several different types of specific models based on this method, they can all be described by a set of states and probabilistic transition functions between these states; typically this is represented by some form of directed graph. Markov models are often used to model probabilistic processes in which all the relevant information of the system can be captured in a single pre-defined state. Different types of Markov model are applicable to quite different tasks owing to their special properties; for example, Markov chains are useful for modelling certain natural processes, particularly in physics or chemistry simulations, while partially observable Markov decision processes (POMDPs) are useful for problems such as automated robot navigation.
+	
+	\subsection{Markov Chains}
+	
+	Markov chains are a type of Markov model in which each state is directly observed as an output of the system being modelled, and the transitions between these states are stochastic and autonomous, meaning that they occur with a certain probability that is not influenced by any input to the system. Algorithms based on Markov chains were some of the first learning models applied to music, with one of the first academic examples appearing as early as 1961 \cite{olson1961aid}. The main appeal of Markov chains in this field is that they are a simple but powerful way to model data that is highly sequential, which strongly applies to music. There have been a wide variety of methods for using Markov chains in composition, as they are fairly basic and so can be integrated into many different systems; some examples of this include using Markov chains trained on classical music as fitness functions for an evolutionary algorithm \cite{lo2006evolving}, or generating a basic melodic pattern with Markov chains and then refining it using an ANN \cite{verbeurgt2004hybrid}. 
+	
+	\subsection{Hidden Markov model}
+	
+	Hidden Markov models (HMMs) are a type of Markov model in which the state transitions are autonomous (i.e. there is no input) but the actual state at any given time is ``hidden.'' This means that the states of the HMM cannot be directly observed, but only inferred (probabilistically) based on the visible output that they emit. This is useful for modelling any kind of sequential data which can only be observed via a dependent sequential variable; examples include complex processes such as cryptanalysis, language translation, or protein folding. A notable advantage that HMMs have over Markov chains is that they are able to learn features that are not necessarily immediately reflected in the output data; this gives them an advantage in algorithmic composition, as they are able to learn a limited form of context for notes.
 	
 	\section{Artificial Neural Networks in Algorithmic Composition}
 	\label{sec:anns}
 	
-	As described in section \ref{sec:supervised-learning}, artificial neural networks (ANNs) are a powerful class of techniques for approximating functions, and recurrent neural networks (RNNs) extend their functionality to add a form of memory allowing for the comprehension of sequential data. Within this class there have been many different techniques created for performing melodic composition, with many featuring unusual novelties and useful unique properties.
+	As described in section \ref{sec:ann-overview}, artificial neural networks (ANNs) are a powerful class of techniques for approximating functions, and recurrent neural networks (RNNs) extend their functionality to add a form of memory allowing for the comprehension of sequential data. Within this class there have been many different techniques created for performing melodic composition, with many featuring unusual novelties and useful unique properties.
 	
 	\subsection{Jordan Network With Sparse Pitch Representation and Planning Units}
 	\label{sec:todd-net}
@@ -309,7 +393,7 @@
 	
 	This network was found to perform reasonably well by Todd. The primary testing metric used in the original paper was the computation required for the network to learn to recreate a number of distinct melodies. The results were fairly promising for the time, with a network of hidden layer size 15 being sufficient to learn up to 4 different songs of 34 time steps each. The number of epochs of training required notably scaled linearly with the number of songs; 2,000 for 1 song, 4,500 for 2 songs, and 8,500 for 4 songs. Reducing the number of hidden units from 15 to 8 however increased the number of epochs required to learn 2 songs to 50,000, due to the increased difficulty of representing the complex patterns of the song with a simpler function.
 	
-	Following this, a subjective assessment was formed on the ability of the network to create new melodies outside of the training set. This displays one of the advantages of using planning units, as by enabling or disabling different plan inputs the network can be made to output songs of different styles drawing inspiration from one or more of the training songs. A number of observations were made about the original compositions produced by the network: one interesting property it displayed was that when using a single plan unit it tended to output melodies consisting of strings of pitches from the corresponding training melody, but stitched together in new orders at points where the pitches aligned. This ultimately results in the melodies eventually beginning to loop, as at some point the network ends up in a similar state to its initial state and starts playing the opening sequence again. It was also observed to have a very weak understanding of rhythm - the single neuron for representing the start of new notes was insufficiently complex to model the structured nature of musical rhythm. Despite training, the network was unable to establish a relationship between pitch changes and note beginnings.
+	Following this, a subjective assessment was formed on the ability of the network to create new melodies outside of the training set. This displays one of the advantages of using planning units, as by enabling or disabling different plan inputs the network can be made to output songs of different styles drawing inspiration from one or more of the training songs. A number of observations were made about the original compositions produced by the network: one interesting property it displayed was that when using a single plan unit it tended to output melodies consisting of strings of pitches from the corresponding training melody, but stitched together in new orders at points where the pitches aligned. This ultimately results in the melodies eventually beginning to loop, as at some point the network ends up in a similar state to its initial state and starts playing the opening sequence again. It was also observed to have a very weak understanding of rhythm - the single neuron for representing the start of new notes was insufficiently complex to model the structured nature of musical rhythm. Despite training, the network was unable to recognize a relationship between pitch changes and note beginnings.
 	
 	\subsection{Elman Network with Circle-of-Thirds Pitch and Chaotic Inspiration}
 	\label{sec:coca-net}
@@ -356,18 +440,18 @@
 			& |[plain]| & \\
 			|[plain]| & |[plain]| & |[plain]| \\
 			& |[plain]| & \\
-			|[dot]| & |[plain]| & |[plain]| \\
-			|[dot]| & |[plain]| & \\
-			|[dot]| & |[plain]| & |[plain]| \\
-			& |[plain]| & \\
-			|[plain]| & |[plain]| & |[plain]| \\
-			& |[plain]| & \\
-			|[plain]| & |[plain]| & |[plain]| \\
-			& |[plain]| & \\
-			|[dot]| & |[plain]| & |[plain]| \\
-			|[dot]| & |[plain]| & \\
-			|[dot]| & |[plain]| & |[plain]| \\
-			& |[plain]| & |[plain]| \\
+%			|[dot]| & |[plain]| & |[plain]| \\
+%			|[dot]| & |[plain]| & \\
+%			|[dot]| & |[plain]| & |[plain]| \\
+%			& |[plain]| & \\
+%			|[plain]| & |[plain]| & |[plain]| \\
+%			& |[plain]| & \\
+%			|[plain]| & |[plain]| & |[plain]| \\
+%			& |[plain]| & \\
+%			|[dot]| & |[plain]| & |[plain]| \\
+%			|[dot]| & |[plain]| & \\
+%			|[dot]| & |[plain]| & |[plain]| \\
+%			& |[plain]| & |[plain]| \\
 		};
 		% Input arrows
 		\foreach \ai [count=\mi ]in {2,4}
@@ -403,8 +487,8 @@
 	
 	\begin{figure}[h]
 		\centering
-		\includegraphics[width=1.0\textwidth]{circles-of-thirds}
-		\caption{The circle-of-thirds representation of pitch; the upper row circles contain intervals of major thirds, and the lower row minor thirds. Each pitch within a 12 semitone octave can be uniquely identified by a pair of circles.}
+		\includegraphics[width=0.8\textwidth]{circles-of-thirds}
+		\caption{The circle-of-thirds representation of pitch; the upper row circles contain intervals of major thirds, and the lower row minor thirds. Each pitch within a 12 semitone octave can thus be uniquely identified by a pair of circles.}
 	\end{figure}
 	
 	\subsubsection{Chaotic Inspiration}
@@ -620,12 +704,12 @@
 	
 	For each of the tested algorithms described in the section above, a pair of tests were performed. The first set of tests were objective tests designed to estimate the effect on performance of varying the parameters to the algorithm. Essentially the goal of this stage was to determine the optimal performance state for each algorithm, and as such the exact details of the tests were different (to a limited extent) for each algorithm - this was not problematic at all as no cross-comparison was taking place. The second set of tests was a subjective evaluation of the algorithms, designed to test their performance in a compositional context. These tests were performed identically for each algorithm and provided them with a ranking as well as an overall quality assessment. 
 	
-	\subsection{Objective Analysis}
+	\subsection{Objective Tests}
 	\label{sec:objective-analysis}
 	
-	The objective tests were based heavily on a simple test that has been used many times before in existing literature \cite{todd1989connectionist,franklin2006recurrent,paiement2007generative}: the ability to learn a song exactly and recreate it from memory. In this particular case the models were trained on a set of $13$ musical pieces and attempted to recreate each. Notably for this task the testing set is not separated from the training set; this is by design, as the goal of the model is to learn the features of the songs - it would be completely infeasible for any model to be expected to accurately recreate a song it has never seen before. Naturally this test is well-suited to supervised learning models and poorly suited to others, which is acceptable in this case. This test is an imperfect way to assess algorithmic composition in general; it does not select for many of the positive cases, in which an algorithm produces consistently good but original content, and it also selects for negative cases such as when the algorithm overfits to the training set and only ever recalls exact melodies it has previously seen. It does, however, serve as a good indicator that a model is at least capable of modelling music to a limited extent, which is an acceptable basis for more in-depth testing.
+	The objective tests were based on a simple test that has been used many times before in existing literature \cite{todd1989connectionist,franklin2006recurrent,paiement2007generative}: the ability to learn a song and recreate it from memory. In this particular case the models were trained on a set of $6$ musical pieces and attempted to recreate each. Notably for this task the testing set is not separated from the training set; this is by design, as the goal of the model is to learn the features of the songs - it would be completely infeasible for any model to be expected to accurately recreate a song it has never seen before. Naturally this test is well-suited to supervised learning models and poorly suited to others, which is acceptable in this case. This test is an imperfect way to assess algorithmic composition in general; it does not select for many of the positive cases, in which an algorithm produces consistently good but original content, and it also selects for negative cases such as when the algorithm overfits to the training set and only ever recalls exact melodies it has previously seen. It does, however, serve as a good indicator that a model is at least capable of modelling music to a limited extent, which is an acceptable basis for more in-depth testing.
 	
-	Some of the factors that affect the outcome of the test are the number of training iterations used, the size and complexity of the training set, and the parameters of the model. Given that the goal is to fit to the data as closely as possible, a larger number of iterations can always be expected to result in an improvement in the resulting model. It is still a point of interest however to examine the number of iterations needed to achieve an ideal or close-to-ideal result, as this will affect the amount of time required to train the model, which has an important impact on its value as a tool. The choice of training data may affect different algorithms in different ways, depending on how well that algorithm performs within the particular genre being used. As an example, a model that has trouble fitting to complicated rhythms will likely perform much better on rock n' roll than jazz. 
+	Some of the factors that affect the outcome of the test are the number of training iterations used, the size and complexity of the training set, and the parameters of the model. Given that the goal is to fit to the data as closely as possible, a larger number of iterations can always be expected to result in an improvement in the resulting model. It is still a point of interest however to examine the number of iterations needed to achieve an ideal or close-to-ideal result, as this will affect the amount of time required to train the model, which has an important impact on its value in a practical use case. The choice of training data may affect different algorithms in different ways, depending on how well that algorithm performs on the particular characteristics of the music being used. As an example, a model that has trouble fitting to complicated rhythms will likely perform much better on rock n' roll than jazz. 
 	
 	\subsubsection{Testing Protocol}
 	
@@ -648,7 +732,7 @@
 		\item For the Elman network, during generation the chaotic inspiration should be set to the same value as was used for the corresponding melody during training; this is because the chaotic inspiration is deliberately meant to introduce originality to the output, and so when trying to exactly imitate a piece the inspiration value should also be imitated.
 	\end{itemize}
 	
-	\subsection{Subjective Analysis}
+	\subsection{Subjective Tests}
 	\label{sec:subjective-analysis}
 	
 	The subjective analysis of the algorithms was intended to give a more useful evaluation of their overall effectiveness at co-composition. Despite the highly subjective nature of music and creativity in general, a relatively low proportion of existing work in algorithmic composition makes use of any human evaluation beyond cursory musings on the musical nature of the algorithm's outputs. This is most likely due to the difficulty of obtaining useful data from a human subject with regard to artistic quality. The test which generally overcomes these difficulties most effectively, and one of the most popular subjective tests within computational creativity for both cultural and practical reasons, is the Turing test. The general protocol for this test in the context of art is to present a human subject with a pair of artistic works, one created by a human and the other by a computer, and challenge them to determine which was created by the computer. This is generally considered to be an effective measure of computational creativity, as the goal of most such tasks is to be able to effectively imitate the creativity found in humans; therefore, indistinguishability between human and algorithm may be considered a success of sorts.
@@ -678,14 +762,10 @@
 	
 	The random generation algorithm chosen is the chaotic inspiration algorithm used in \ref{sec:elman-implementation}. This is a convenient way to generate melodies that fit within the specified key without featuring any kind of intelligence in the composition process.
 	
-	\section{Objective Results}
-
-	In this section the results for the first stage of tests, in which the goal is to imitate an existing piece, are given along with some analysis. It is important to note that these tests are primarily useful for determining optimal parameters and certain objective qualities such as relative run-time, rather than giving an indicator of overall performance with regard to the main objective (which is covered by the second stage of tests). Because of this each algorithm being tested will be reviewed independently with no comparative analysis taking place.
-	
-	As discussed in \ref{sec:objective-analysis} above, the rhythm component of the Jordan model is to be tested independently before the entire model.
+	\section{Objective Test Parameters}
 	
 	\subsection{Distance Model with HMM}
-
+	
 	The combined distance model and hidden Markov model, described in \ref{sec:distance-model} and \ref{sec:jordan-implementation}, is a model that represents only rhythm. This contrasts with most of the other models, which represent both rhythm and pitch. As a result the objective measure used is slightly different from the other test cases. Conveniently the model itself already provides a useful measure for similarity between two rhythms in the form of the Hamming distance. The distance value given by this measure is the number of timesteps at which the rhythms differ. Although this measure is imperfect in some ways (see \ref{sec:jordan-implementation}) it suffices for producing an accurate ranking of results.
 	
 	As this rhythm model is in itself a composite model in which one component acts as a generator and the other acts to refine the result, it can be divided into two separate testing stages in the same manner as the Jordan model. There is one reason why this might not be preferred: During the refinement stage of the rhythm model, both the HMM and the distance model play an important role; while a more generally accurate HMM would appear to produce strictly better results it is not a guarantee when paired with the distance model. However it is a reasonably safe assumption that cases in which generally high accuracy does not translate to high paired accuracy are both rare and mostly insignificant. In the absence of any concrete evidence or reasoning to suggest the significance of such a case, these tests assume independence between component parameter tunings.
@@ -712,16 +792,85 @@
 	
 	%TODO: Table this stuff, for all sections
 	
+	\subsection{Jordan-Based Model}
+	
+	Following the previous tests, the full Jordan model was tested for its ability to recreate full melodies. The rhythm-based parameters were set as \textbf{TODO} in accordance with the results above. As this model uses both pitch and rhythm it is necessary to use a different distance measure to the rhythm distance used previously. However, the timestep representation of melody used by the Jordan network does allow the Hamming distance to be used once more; two timesteps can be considered different if either the pitch or the rhythm differs between them. This is a fairly strict measure as the model will receive a minimal score for a perfect rhythm if the pitches are all wrong or vice versa, but pitch and rhythm are such intertwined concepts in music that they should not be scored independently.
+	
+	\subsubsection{Parameters Tested}
+	
+	The parameters to the Jordan model are:
+	\begin{itemize}
+		\item $h$ -- The number of neurons in the ANN's hidden layer
+	\end{itemize}
+	And the parameters to the training function are:
+	\begin{itemize}
+		\item $e$ -- Number of epochs of training for the ANN
+	\end{itemize}
+	
+	The parameters involved with the HMM are not included in this section, as they have already been fixed. An important feature of the values being tested is that they have a close relation in performance impact. Networks with a larger number of hidden neurons typically require many more epochs to learn any valuable information, and additionally once the network reaches convergence additional epochs contribute nothing further. As a result there are some combinations of $h$ and $e$ which do not give results of any value; therefore instead of testing every combination of $h$ and $e$, a range of $e$ values will be tested for each value of $h$ to determine its worst and best performance, using the results from previous $h$ values to determine a viable starting point. 
+	
+	\begin{table}[h]
+		\begin{center}
+			\begin{tabular}{cc}
+				\toprule
+				Parameter & Values Tested\\
+				\hline
+				$h$ & 12, 24, 36, 48, 60, 72\\
+				$e$ & 5000, 8000, 13000, 21000, 34000, 55000\\
+				\bottomrule
+			\end{tabular}
+		\end{center}
+		\caption{Parameters tested for the Jordan-based model's network}
+		\label{tab:jordan-net-parameters}
+	\end{table}
+	
+	The values tested for the number of hidden neurons were chosen to cover the likely range of useful values for a dataset of this size (estimated based on the literature \cite{todd1989connectionist}). The range of values that may be tested for the number of epochs is a liberal estimate of the upper and lower bounds that may be required by the network. As previously mentioned, testing for a particular $h$ value will cease if increasing the number of epochs has no apparent effect on results, so there is no issue with assuming a higher upper bound; it is important to set an upper bound of some kind however, as this work is intended to have practical implications and hence must obey time constraints that are at least semi-realistic.
+	
+	\subsection{Elman-Based Model}
+	
+	The Elman model was tested for its ability to produce complete melodies similar to the Jordan model described above. Unlike the previously discussed models however the Elman model does not use a timestep representation of music, but a pitch-duration one. Despite this a Hamming distance measure on a timestep representation of the output melody is a solid measure of accuracy, as it pays more heed to the absolute temporal position of musical events (a key component of musicality) than a purely duration-based measure.
+	
+	\subsubsection{Parameters Tested}
+	
+	The parameters to the Elman model are:
+	\begin{itemize}
+		\item $h$ -- The number of neurons in the ANN's hidden layer
+	\end{itemize}
+	And the parameters to the training function are:
+	\begin{itemize}
+		\item $e$ -- Number of epochs of training for the ANN
+	\end{itemize}
+	
+	These parameters are identical to those used for the Jordan network above, as they are both fundamentally similar; the main differences between the two are the representation, internal connectivity, and use of chaotic inspiration, none of which are directly influenced by parameters. The values chosen for the parameters are the same as those used for the Jordan network for a similar reason; it is unlikely that either network will require many more neurons or training epochs than the other. These differences do of course still have enough of an impact that the actual results from the Jordan model tests cannot be used in any way for these tests.
+	
+	\begin{table}[h]
+		\begin{center}
+			\begin{tabular}{cc}
+				\toprule
+				Parameter & Values Tested\\
+				\hline
+				$h$ & 12, 24, 36, 48, 60, 72\\
+				$e$ & 5000, 8000, 13000, 21000, 34000, 55000\\
+				\bottomrule
+			\end{tabular}
+		\end{center}
+		\caption{Parameters tested for the Elman-based model}
+		\label{tab:elman-parameters}
+	\end{table}
+	
+	\section{Objective Results}
+
+	In this section the results for the first stage of tests, in which the goal is to imitate an existing piece, are given along with some analysis. It is important to note that these tests are primarily useful for determining optimal parameters and certain objective qualities such as relative run-time, rather than giving an indicator of overall performance with regard to the main objective (which is covered by the second stage of tests). Because of this each algorithm being tested will be reviewed independently with no comparative analysis taking place.
+	
+	As discussed in \ref{sec:objective-analysis} above, the rhythm component of the Jordan model is tested independently to the rest of the model.
+	
+	\subsection{Distance Model with HMM}
+	
 	\subsubsection{Results for HMM}
 	
-	The HMM was tested with increasing numbers of iterations $i_H$ for each number of hidden states $s$ up until the model was able to consistently reach convergence. The number of iterations needed to reach convergence for each value of $s$ is recorded in figure \ref{fig:hmm-iterations-convergence}. An interesting feature of this relationship is that the number of iterations is minimal at $h = 24$ and increases as the number of states rises or falls. This is due to the fact that as the number of states decreases it become more difficult to accurately fit to the dataset, meaning a greater number of iterations is needed to find a stable fitting. Increasing the number of states also increases the number of iterations to convergence due to the increased complexity of the model being fitted.
-		
-	\begin{figure}[h]
-		\centering
-		\includegraphics[width=0.4\textwidth]{filler}
-		\caption{Number of iterations required for convergence by number of hidden states in HMM}
-		\label{fig:hmm-iterations-convergence}
-	\end{figure}
+	The HMM was tested with increasing numbers of iterations $i_H$ for each number of hidden states $s$ up until the model was able to consistently reach convergence. The number of EM iterations needed to reach convergence for each value of $s$ proved to feature a very high degree of variance. As a reminder, the HMM training process for this model involves fitting many different HMMs to the dataset and then selecting the best-performing, as a way to avoid converging early to a poor overall fit (see \ref{sec:jordan-implementation}); due to the inherent randomness of the EM algorithm and the size/complexity of the data this resulted in a very noisy spread.
+	
+	%is recorded in figure \ref{fig:hmm-iterations-convergence}. An interesting feature of this relationship is that the number of iterations is minimal at $h = 24$ and increases as the number of states rises or falls. This is due to the fact that as the number of states decreases it become more difficult to accurately fit to the dataset, meaning a greater number of iterations is needed to find a stable fitting. Increasing the number of states also increases the number of iterations needed for convergence due to the increased complexity of the model being fitted. As a reminder, the HMM training process for this model involves fitting many different HMMs to the dataset and then selecting the best-performing, as a way to avoid converging early to a poor overall fit (see \ref{sec:jordan-implementation}); this may result in a fairly high number of iterations in some cases, and should be taken into account when considering these results.
 	
 	The trained HMMs were used to rewrite the final bars of a rhythm. The accuracies of the converged HMMs for each of the completion tasks are given in table \ref{tab:hmm-results}. As the HMM is a stochastic generative process, the accuracy may vary and so is listed as an average over 5 runs. It can be seen that \textbf{TODO ANALYSIS}
 	
@@ -788,25 +937,6 @@
 	\subsection{Jordan Model}
 	\label{sec:objective-jordan}
 	
-	Following the previous tests, the full Jordan model was tested for its ability to recreate full melodies. The rhythm-based parameters were set as \textbf{TODO} in accordance with the results above. As this model uses both pitch and rhythm it is necessary to use a different distance measure to the rhythm distance used previously. However, the timestep representation of melody used by the Jordan network does allow the Hamming distance to be used once more; two timesteps can be considered different if either the pitch or the rhythm differs between them. This is a fairly strict measure as the model will receive a minimal score for a perfect rhythm if the pitches are all wrong or vice versa, but pitch and rhythm are such intertwined concepts in music that they should not be scored independently.
-	
-	\subsubsection{Parameters Tested}
-	
-	The parameters to the Jordan model are:
-	\begin{itemize}
-		\item $h$ -- The number of neurons in the ANN's hidden layer
-	\end{itemize}
-	And the parameters to the training function are:
-	\begin{itemize}
-		\item $e$ -- Number of epochs of training for the ANN
-	\end{itemize}
-	
-	The parameters involved with the HMM are not included in this section, as they have already been fixed. An important feature of the values being tested is that they have a close relation in performance impact. Networks with a larger number of hidden neurons typically require many more epochs to learn any valuable information, and additionally once the network reaches convergence additional epochs contribute nothing further. As a result there are some combinations of $h$ and $e$ which do not give results of any value; therefore instead of testing every combination of $h$ and $e$, a range of $e$ values will be tested for each value of $h$ to determine its worst and best performance, using the results from previous $h$ values to determine a viable starting point. 
-	
-	The values tested for the number of hidden neurons are $h = \{12, 24, 36, 48, 60, 72\}$, as this covers the likely range of useful values for a dataset of this size (estimated based on the literature \cite{todd1989connectionist}). The range of values that may be tested for the number of epochs are $e = \{5000, 8000, 13000, 21000, 34000, 55000\}$, chosen as a liberal estimate to the upper and lower bounds that may be required by the network. As previously mentioned testing for a particular $h$ value will cease if increasing the number of epochs has no apparent effect on results, so there is no issue with assuming a higher upper bound; it is important to set an upper bound of some kind however, as this work is intended to have practical implications and hence must obey time constraints that are at least semi-realistic.
-	
-	\subsubsection{Results}
-	
 	The Jordan model was tested for each given number of hidden neurons $h$ in ascending order, adjusting the starting number of training epochs according to previous results and halting the tests when increasing the number of epochs ceases to increase performance. The accuracy for recreating 1 bar of melody, averaged over 5 runs, is given in table \ref{tab:jordan-1-bar-results}.
 	
 	\begin{table}[htp]
@@ -830,26 +960,9 @@
 		\label{tab:jordan-1-bar-results}
 	\end{table}
 	
+	It can be noted that the Jordan model has an overall low accuracy, peaking at approximately $22\%$. This can be attributed to the difficulty of the task: from a pitch perspective, each song in the training/testing set features 128 consecutive discrete data points which take approximately 8 different values but follow a set of complex and often ambiguous pattern; a truly random model (within a single octave) has an expected accuracy $E(\mathbf{acc}) = (\frac{1}{12} \cdot \frac{1}{2}) \approx 0.042$, but improving on this value by any significant margin requires a very complex model. With that in mind, there are some definitely identifiable weaknesses of the model within this 
+	
 	\subsection{Elman Model}
-	
-	The Elman model was tested for its ability to produce complete melodies similar to the Jordan model described above. Unlike the previously discussed models however the Elman model does not use a timestep representation of music, but a pitch-duration one. Despite this a Hamming distance measure on a timestep representation of the output melody is a solid measure of accuracy, as it pays more heed to the absolute temporal position of musical events (a key component of musicality) than a purely duration-based measure.
-	
-	\subsubsection{Parameters Tested}
-	
-	The parameters to the Elman model are:
-	\begin{itemize}
-		\item $h$ -- The number of neurons in the ANN's hidden layer
-	\end{itemize}
-	And the parameters to the training function are:
-	\begin{itemize}
-		\item $e$ -- Number of epochs of training for the ANN
-	\end{itemize}
-	
-	These parameters are identical to those used for the Jordan model's network, as they are both fundamentally similar; the main differences between the two are the representation, internal connectivity, and use of chaotic inspiration, none of which are influenced by model or training parameters. They do however introduce a large enough difference that the results from the Jordan model tests cannot be used, either as a substitute or to help guide the tests, for this model.
-	
-	The values tested for the number of neurons and the range of values tested for the number of epochs are $h = \{12, 24, 36, 48, 60, 72\}$ and $e = \{5000, 8000, 13000, 21000, 34000, 55000\}$, for the same reasons described in \ref{sec:objective-jordan}.
-	
-	\subsubsection{Results}
 	
 	The Elman model was tested for each given number of hidden neurons $h$ in ascending order, adjusting the range of training epochs in the same manner used in \ref{sec:objective-jordan}. The accuracies for recreating 1, 2, and 4 bars of the target melodies are given in tables \ref{tab:elman-1-bar-results}, \ref{tab:elman-2-bar-results}, and \ref{tab:elman-4-bar-results}.
 	
@@ -915,6 +1028,22 @@
 		\caption{Average accuracy of Elman networks when completing 4 bars of melody}
 		\label{tab:elman-4-bar-results}
 	\end{table}
+	
+	As with the Jordan model, the Elman model does not have a particularly high degree of accuracy. This is a reasonable outcome given the sheer scope of the task.
+	% If it's better
+	It is s
+	% If it's worse
+	It is somewhat surprising however that the Elman model underperforms compared to the Jordan model on this task. As was previously established 
+	
+	An interesting detail of the model is its performance in different sections of the song. It is expected that just as a melody has structure that varies over time, the performance of the model will vary throughout the song as well. This effect is particularly stark in this example however, likely due to the fact that nursery rhymes generally have a fairly compact song structure - a necessity when the entire melody is only 8 bars long. The upshot of this is that certain sections of the melody, such as the introduction or the coda/outro, occur only for 1 bar or are entirely omitted. This increases the difficulty for the network in trying to learn these sections, resulting in them simply not being used in the generated pieces. This is reflected in the poor accuracy of the network during the final bar for most songs; the most typical way to end a song is to resolve back to the root tone, but as the root tone is otherwise infrequently played the network tends to avoid it. 
+	
+	The number of neurons in the hidden layer did not have as significant of an impact on performance as would probably be expected from such an increase in computational potential. The reason for this can be attributed to the difference in complexity between exactly imitating a song and finding a simple approximation to it. Learning 6 different 8 bar songs is a very difficult task for an ANN, especially when almost the entirety of all of the songs consist of the same 8 notes in the C Major scale. As a result the number of neurons and training epochs needed to actually learn the patterns exactly would be extremely high - more so than would likely be desired for a practical application (even leaving aside the overfitting). As the models with higher neuron counts are still quite far from reaching convergence when the simple models have already converged, they naturally have a low accuracy - in some cases even lower than the simpler models. This is shown in figure \ref{fig:elman-neurons-epochs-gradient}, which shows the growth in average accuracy of several models (of different neuron counts) as the number of epochs increase.
+	
+	\begin{figure}[h]
+		\centering
+		\caption{Model performance by average accuracy over number of training epochs}
+		\label{fig:elman-neurons-epochs-gradient}
+	\end{figure}
 	
 	\section{Subjective Results}
 	
