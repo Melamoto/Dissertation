@@ -19,6 +19,15 @@
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\argmax}{arg\,max}
 
+\newcommand{\setmeter}[2]{\ensuremath{%
+		\vcenter{\offinterlineskip
+			\halign{\hfil##\hfil\cr
+				$\scriptstyle#1$\cr
+				\noalign{\vskip1pt}
+				$\scriptstyle#2$\cr}
+		}}%
+	}
+
 \begin{document}
 	
 	\maketitle
@@ -707,7 +716,7 @@
 	\subsection{Objective Tests}
 	\label{sec:objective-analysis}
 	
-	The objective tests were based on a simple test that has been used many times before in existing literature \cite{todd1989connectionist,franklin2006recurrent,paiement2007generative}: the ability to learn a song and recreate it from memory. In this particular case the models were trained on a set of $6$ musical pieces and attempted to recreate each. Notably for this task the testing set is not separated from the training set; this is by design, as the goal of the model is to learn the features of the songs - it would be completely infeasible for any model to be expected to accurately recreate a song it has never seen before. Naturally this test is well-suited to supervised learning models and poorly suited to others, which is acceptable in this case. This test is an imperfect way to assess algorithmic composition in general; it does not select for many of the positive cases, in which an algorithm produces consistently good but original content, and it also selects for negative cases such as when the algorithm overfits to the training set and only ever recalls exact melodies it has previously seen. It does, however, serve as a good indicator that a model is at least capable of modelling music to a limited extent, which is an acceptable basis for more in-depth testing.
+	The objective tests were based on a simple test that has been used many times before in existing literature \cite{todd1989connectionist,franklin2006recurrent,paiement2007generative}: the ability to learn a song and recreate it from memory. Notably for this task the testing set is not separated from the training set; this is by design, as the goal of the model is to learn the features of the songs - it would be completely infeasible for any model to be expected to accurately recreate a song it has never seen before. Naturally this test is well-suited to supervised learning models and poorly suited to others, which is acceptable in this case. This test is an imperfect way to assess algorithmic composition in general; it does not select for many of the positive cases, in which an algorithm produces consistently good but original content, and it also selects for negative cases such as when the algorithm overfits to the training set and only ever recalls exact melodies it has previously seen. It does, however, serve as a good indicator that a model is at least capable of modelling music to a limited extent, which is an acceptable basis for more in-depth testing.
 	
 	Some of the factors that affect the outcome of the test are the number of training iterations used, the size and complexity of the training set, and the parameters of the model. Given that the goal is to fit to the data as closely as possible, a larger number of iterations can always be expected to result in an improvement in the resulting model. It is still a point of interest however to examine the number of iterations needed to achieve an ideal or close-to-ideal result, as this will affect the amount of time required to train the model, which has an important impact on its value in a practical use case. The choice of training data may affect different algorithms in different ways, depending on how well that algorithm performs on the particular characteristics of the music being used. As an example, a model that has trouble fitting to complicated rhythms will likely perform much better on rock n' roll than jazz. 
 	
@@ -720,7 +729,7 @@
 		\item For each combination of test sets, models, parameters, and training iterations:
 		\begin{enumerate}
 			\item Train a model on the test set using the given parameters for the given number of training iterations.
-			\item Have the trained model attempt to complete the last 1, 2, and 4 bars of each piece in the training set.
+			\item Have the trained model attempt to rewrite consecutive sections of 1, 2, and 4 bars for each song in the training set.
 			\item Record the distance between the model output and the corresponding original fragment.
 		\end{enumerate}
 		\item For each model determine the set of parameters and iteration counts with minimum size/complexity that achieve the greatest performance, recording these as ``ideal'' cases.
@@ -788,7 +797,22 @@
 	
 	Distinctly absent from the training parameters is the convergence tolerance for the EM algorithms in both cases, $c_H$ and $c_D$, which is used to halt the algorithm when the rate of improvement per iteration falls below a certain threshold, i.e. the algorithm has converged. The reason for their absence is that the tolerance value for EM convergence has strict inverse proportionality to the success of the model, and so will be fixed at a sufficiently low value $c_H = c_D = 10^{-7}$ for all tests to ensure a fair comparison. Furthermore, not all iteration counts need be tested for a given model; if the EM algorithm consistently converges within a certain number of iterations then testing that model with any greater number of iterations is purely redundant. The number of iterations required for the distance model to converge is also sufficiently small that it can always be allowed to converge. 
 	
-	The values tested for each of the model parameters are $s = \{8,16,24,32,40,48,56,64,72\}$ and $c = \{3,5,8\}$, the tested iteration counts for training are $i_H = \{300, 500, 800, 1300, 2100, 3400\}$, and the values used for generation are $\lambda = \{\frac{1}{4},\frac{1}{2},1,2,4\}$, for a maximum possible total (depending on iterations needed for convergence) of 30 HMM tests and 15 distance model tests.
+	\begin{table}[h]
+		\begin{center}
+			\begin{tabular}{cc}
+				\toprule
+				Parameter & Values Tested\\
+				\hline
+				$s$ & 8, 16, 24, 32, 40, 48, 56, 64, 72\\
+				$c$ & 3, 5, 8\\
+				$\lambda$ & $\frac{1}{4}$, $\frac{1}{2}$, 1, 2, 4\\
+				$i_H$ & 300, 500, 800, 1300, 2100, 3400\\
+				\bottomrule
+			\end{tabular}
+		\end{center}
+		\caption{Parameters tested for the rhythm model used in the Jordan-based model}
+		\label{tab:jordan-rhythm-parameters}
+	\end{table}
 	
 	%TODO: Table this stuff, for all sections
 	
@@ -862,17 +886,19 @@
 
 	In this section the results for the first stage of tests, in which the goal is to imitate an existing piece, are given along with some analysis. It is important to note that these tests are primarily useful for determining optimal parameters and certain objective qualities such as relative run-time, rather than giving an indicator of overall performance with regard to the main objective (which is covered by the second stage of tests). Because of this each algorithm being tested will be reviewed independently with no comparative analysis taking place.
 	
-	As discussed in \ref{sec:objective-analysis} above, the rhythm component of the Jordan model is tested independently to the rest of the model.
+	%TODO Name the nursery rhymes
+	The testing data used for these tests was a set of $6$ nursery rhymes, all of which are in \setmeter{4}{4} meter, 8 bars long, and in the key of C major. This testing size is much larger than the test set used for training/testing the neural networks that are derived from in this work. The reason for this is that a larger dataset is more appropriate for the task at hand; the networks developed here should be generating segments of good musical quality rather than learning melodies with high precision. As a result they are not expected to have high accuracy, but should still produce an output somewhat resembling the original melody (and so should vastly outperform a random model). In order to account for the stochastic nature of the models in use, each set of bars was generated $30$ times and the average accuracy taken. Finally, the task of replacing bars in the original song was repeated for each set of consecutive viable bars within the song (with the exception of the first bar, as there is no prior material for the algorithm to build on).
 	
 	\subsection{Distance Model with HMM}
 	
+	
+	
 	\subsubsection{Results for HMM}
 	
-	The HMM was tested with increasing numbers of iterations $i_H$ for each number of hidden states $s$ up until the model was able to consistently reach convergence. The number of EM iterations needed to reach convergence for each value of $s$ proved to feature a very high degree of variance. As a reminder, the HMM training process for this model involves fitting many different HMMs to the dataset and then selecting the best-performing, as a way to avoid converging early to a poor overall fit (see \ref{sec:jordan-implementation}); due to the inherent randomness of the EM algorithm and the size/complexity of the data this resulted in a very noisy spread.
+	The HMM was tested with increasing numbers of iterations $i_H$ for each number of hidden states $s$ up until the model was able to consistently reach convergence. The number of EM iterations needed to reach convergence for each value of $s$ proved to feature a very high degree of variance. As a reminder, the HMM training process for this model involves fitting many different HMMs to the dataset and then selecting the best-performing, as a way to avoid converging early to a poor overall fit (see \ref{sec:jordan-implementation}); due to the inherent randomness of the EM algorithm and the size/complexity of the data this resulted in a very noisy spread. 
+	%TODO: Mention a way this could be fixed without implying this was all left to the last minute
 	
-	%is recorded in figure \ref{fig:hmm-iterations-convergence}. An interesting feature of this relationship is that the number of iterations is minimal at $h = 24$ and increases as the number of states rises or falls. This is due to the fact that as the number of states decreases it become more difficult to accurately fit to the dataset, meaning a greater number of iterations is needed to find a stable fitting. Increasing the number of states also increases the number of iterations needed for convergence due to the increased complexity of the model being fitted. As a reminder, the HMM training process for this model involves fitting many different HMMs to the dataset and then selecting the best-performing, as a way to avoid converging early to a poor overall fit (see \ref{sec:jordan-implementation}); this may result in a fairly high number of iterations in some cases, and should be taken into account when considering these results.
-	
-	The trained HMMs were used to rewrite the final bars of a rhythm. The accuracies of the converged HMMs for each of the completion tasks are given in table \ref{tab:hmm-results}. As the HMM is a stochastic generative process, the accuracy may vary and so is listed as an average over 5 runs. It can be seen that \textbf{TODO ANALYSIS}
+	The accuracies of the converged HMMs for each of the completion tasks are given in table \ref{tab:hmm-results}. 
 	
 	\begin{table}[h]
 		\begin{center}
@@ -898,7 +924,7 @@
 		\label{tab:hmm-results}
 	\end{table}
 	
-	\subsubsection{Results for Full Model}
+	\subsubsection{Results for Full Distance Model}
 	
 	The distance model was tested with different numbers of mixture model subpopulations $c$ and scoring factors $\lambda$. The parameters relating to the HMM used were $(s = X, i_H = Y)$, $(s = X, i_H = Y)$, and $(s = X, i_H = Y)$, as these all proved to be feasible settings for potential use cases. For each of these sets of parameter the accuracy in recreating the final bars of a rhythm, averaged over 5 runs, are listed in table \ref{tab:rhythm-model-results}.
 	
@@ -937,7 +963,7 @@
 	\subsection{Jordan Model}
 	\label{sec:objective-jordan}
 	
-	The Jordan model was tested for each given number of hidden neurons $h$ in ascending order, adjusting the starting number of training epochs according to previous results and halting the tests when increasing the number of epochs ceases to increase performance. The accuracy for recreating 1 bar of melody, averaged over 5 runs, is given in table \ref{tab:jordan-1-bar-results}.
+	The Jordan model was tested with a fairly wide range of parameter, from $(h = 12, e = 3000)$ to $(h = 72, e = 55000)$. Despite this the algorithm displayed a surprisingly small performance correlation with the number of hidden neurons in the network at some fairly high epoch counts. Although this appears at first to suggest that the number of hidden neurons does not have an impact on the performance of the network, this pattern becomes much more logical when visualising the correlation between epochs and performance for each value of $h$, as shown in figure \ref{fig:jordan-neuron-epoch-growth}. This shows that the networks with higher hidden neuron counts take longer to achieve peak performance, and so will perform equally or worse to simpler networks for sufficiently low epoch counts.
 	
 	\begin{table}[htp]
 		\begin{center}
@@ -960,7 +986,9 @@
 		\label{tab:jordan-1-bar-results}
 	\end{table}
 	
-	It can be noted that the Jordan model has an overall low accuracy, peaking at approximately $22\%$. This can be attributed to the difficulty of the task: from a pitch perspective, each song in the training/testing set features 128 consecutive discrete data points which take approximately 8 different values but follow a set of complex and often ambiguous pattern; a truly random model (within a single octave) has an expected accuracy $E(\mathbf{acc}) = (\frac{1}{12} \cdot \frac{1}{2}) \approx 0.042$, but improving on this value by any significant margin requires a very complex model. With that in mind, there are some definitely identifiable weaknesses of the model within this 
+	An interesting detail of the model is its performance in different sections of the song. It is expected that just as a melody has structure that varies over time, the performance of the model will vary throughout the song as well. This effect is particularly stark in this example however, likely due to the fact that nursery rhymes generally have a fairly compact song structure - a necessity when the entire song is only 8 bars long. The upshot of this is that certain sections of the melody, such as the introduction or the coda/outro, occur only for 1 bar or are entirely omitted. This increases the difficulty for the network in trying to learn these sections, resulting in them simply not being used in the generated pieces. This is reflected in the poor accuracy of the network during the final bar for most songs; the most typical way to end a song is to resolve back to the root tone, but as the root tone is otherwise infrequently played the network tends to avoid it. 
+	
+	% It can be noted that the Jordan model has an overall low accuracy, peaking at approximately $22\%$. This can be attributed to the difficulty of the task: from a pitch perspective, each song in the training/testing set features 128 consecutive discrete data points which take approximately 8 different values but follow a set of complex and often ambiguous pattern; a truly random model (within a single octave) has an expected accuracy $E(\mathbf{acc}) = (\frac{1}{12} \cdot \frac{1}{2}) \approx 0.042$, but improving on this value by any significant margin requires a very complex model. With that in mind, there are some definitely identifiable weaknesses of the model within this d
 	
 	\subsection{Elman Model}
 	
