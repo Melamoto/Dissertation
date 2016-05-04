@@ -895,7 +895,7 @@
 	
 	\subsubsection{Results for HMM}
 	
-	The HMM was tested with increasing numbers of iterations $i_H$ for each number of hidden states $s$ up until the model was able to consistently reach convergence. The number of EM iterations needed to reach convergence for each value of $s$ proved to feature a very high degree of variance. As a reminder, the HMM training process for this model involves fitting many different HMMs to the dataset and then selecting the best-performing, as a way to avoid converging early to a poor overall fit (see \ref{sec:jordan-implementation}); due to the inherent randomness of the EM algorithm and the size/complexity of the data this resulted in a very noisy spread. 
+	The HMM was tested with increasing numbers of iterations $i_H$ for each number of hidden states $s$ up until the model was able to consistently reach convergence. The number of EM iterations needed to reach convergence for each value of $s$ proved to feature a very high degree of variance. As a reminder, the HMM training process for this model involves fitting many different HMMs to the dataset and then selecting the best-performing, as a way to avoid converging early to a poor overall fit (see \ref{sec:jordan-implementation}); due to the inherent randomness of the EM algorithm and the size/complexity of the data this resulted in a very noisy spread. This would need to be resolved with more computation time, as the number of measurements needed to obtain a good view of the relationship between hidden states and training iterations was prohibitively large to obtain during this project. 
 	%TODO: Mention a way this could be fixed that doesn't imply this was all left to the last minute
 	
 	The accuracies of the converged HMMs for each of the completion tasks are given in table \ref{tab:hmm-results}. 
@@ -926,7 +926,7 @@
 	
 	\subsubsection{Results for Full Distance Model}
 	
-	The distance model was tested with different numbers of mixture model subpopulations $c$ and scoring factors $\lambda$. The parameters relating to the HMM used were $(s = X, i_H = Y)$, $(s = X, i_H = Y)$, and $(s = X, i_H = Y)$, as these all proved to be feasible settings for potential use cases. For each of these sets of parameter the accuracy in recreating the final bars of a rhythm, averaged over 5 runs, are listed in table \ref{tab:rhythm-model-results}.
+	The distance model was tested with different numbers of mixture model subpopulations $c$ and scoring factors $\lambda$. The parameters used for the HMM were $(s = X, i_H = Y)$, as these proved to be feasible settings for potential use cases. The accuracy of the full rhythm model in rewriting rhythm is given in table \ref{tab:rhythm-model-results}. The accuracy for the model is fairly high; this can be expected due to the simplicity of rhythm compared to pitch, but even accounting for this the performance is high. It is however consistently imperfect. The reason for this becomes clear when shown actual examples of the model's work (figure \ref{fig:rhythm-model-example}): the model has a high propensity to write crotchets. This can be attributed to the HMM's influence primarily, as well as the fairly low impact of the distance model on a dataset of this size. 
 	
 	\begin{table}[htp]
 		\begin{center}
