@@ -47,16 +47,16 @@
 	\chapter*{Executive Summary}
 	
 	% Hypothesis
-	For my research, I have investigated the hypothesis that existing methods of performing melodic composition using machine learning can be adapted to successfully perform co-composition with a human composer. In this context, success may be measured by subjective impression received from experts in composition. 
+	For my research, I have investigated the hypothesis that existing methods for algorithmic composition using machine learning can be adapted to successfully perform co-composition with a human composer, where success is measured by subjective impression from human composers. 
 	
 	% Achievements
 	In the pursuit of this objective, I have completed the following tasks:
 	\begin{itemize}
-		\item I performed research over existing machine learning methods for algorithmic composition, determining their potential with regards to the main objective and their overall compositional effectiveness.
-		\item I implemented the algorithms that I covered in my research, making adjustments and improvements where necessary to make them suitable for use in an application.
-		\item I adapted the algorithms to add new features that take advantage of the availability of a human composer and the existing composition being built upon.
-		\item I designed and created an application using these algorithms that may be trained on a set of music data (stored in the MIDI format) and will provide an attempted continuation of a given musical input.
-		\item I designed and carried out a series of objective and subjective tests to assess the performance of the application and the algorithms that comprise it.
+		\item I spent approximately 100 hours learning about existing methods for algorithmic composition.
+		\item I wrote 1620 lines of python code to generate, train, and test a set of models that perform algorithmic composition.
+		\item I implemented a neural network designed by Peter Todd \cite{todd1989connectionist}, and improved its accuracy using the distance model designed by Jean-Francois Paiement, Yves Grandvalet, Samy Bengio, and Douglas Eck \cite{paiement2007generative}.
+		\item I implemented the neural network and accompanying chaotic generation algorithm designed by Andr\'es Coca, Roseli Romero, and Liang Zhao \cite{coca2011generation}, adding position as an input to increase accuracy.
+		\item I performed a set of tests on the algorithms implemented, covering both their objective ability to learn music and their subjective usefulness working with a composer.
 	\end{itemize}
 	
 	
@@ -69,7 +69,7 @@
 	\begin{itemize}
 		\item Mido for MIDI file processing
 		\item NumPy for efficient mathematical operations
-		\item SciPy for clustering and regression
+		\item SciPy for clustering, regression, and ordinary differential equation integration
 		\item PyBrain for neural networks
 		\item HmmLearn for hidden Markov models
 	\end{itemize}
@@ -78,7 +78,11 @@
 	
 	\chapter*{Acknowledgements}
 	
-	I would like to thank my supervisor Peter Flach for his guidance over the course of this project in both its technical aspects and in its effective management.
+	I would like to thank my supervisor Peter Flach for his guidance over the course of this project in its technical workings, effective management, and presentation. 
+	
+	I would also like to thank my friend Tom Norton for his great musical advice throughout the project, his keen insight in the writing of this paper, and his full moral support during the most trying of times.
+	
+	Finally I would like to thank all of those who willingly gave up some of the little time they had to help me test my work. 
 	
 	\mainmatter
 	
@@ -87,9 +91,9 @@
 	\chapter{Contextual Background}
 	\label{chap:context}
 	
-	Algorithmic composition is an Artificial Intelligence (AI) problem concerning the creation of music via some algorithmic process. It is currently one of the topics at the forefront of the greater study of \textit{computational creativity}: the challenge of designing an AI that displays, according to some agreeable definition, creativity. This can be described in another way as algorithmically mimicking various aspects of human intelligence, particularly relating to the conception of novel solutions to problems. The arts are a particular subject of interest for this research, as they are widely considered to be highly creative and distinctly human.
+	Algorithmic composition is an Artificial Intelligence (AI) problem concerning the creation of music via some algorithmic process. It is currently one of the topics at the forefront of the greater study of \textit{computational creativity}: the challenge of designing an AI that displays, according to some agreeable definition, creativity. This can be described in another way as algorithmically mimicking various aspects of human intelligence, particularly relating to the conceiving of novel solutions to problems. The arts are a particular subject of interest for this research, as they are widely considered to be highly creative and distinctly human.
 	
-	From an AI researcher's perspective, algorithmic composition is not too different in some ways from most other AI tasks: the goal is to design an algorithm that can analyse some complex natural process, derive an abstract model from the available data, and then select actions according to that model. The subject being modelled in this instance however is a psychological process that is both difficult to measure and relatively poorly understood. Many attempts have been made to find an effective way to deal with this problem; some have attempted a bottom-up approach based directly on human psychology, some have attempted to build a top-down model based on known musical principles, and yet others have tried to tackle it as a purely data-oriented task.
+	From an AI researcher's perspective, algorithmic composition is not too different in some ways from most other AI tasks: the goal is to design an algorithm that can analyse some complex natural process, derive an abstract model from the available data, and then select actions according to that model. The subject being modelled in this instance however is a psychological process that is both difficult to measure and relatively poorly understood. Many attempts have been made to find an effective way to deal with this problem in the case of music; some have attempted a bottom-up approach based directly on human psychology, some have attempted to build a top-down model based on known musical principles, and yet others have tried to tackle it as a purely data-oriented task.
 
 	\section{Computational Creativity}
 	
@@ -104,7 +108,6 @@
 	
 	One of the areas of artificial creativity currently under focus is algorithmic composition. Algorithmic composition is the general term for the application of algorithms in some form to the task of musical composition - in short, AI that can write music. This is a particularly enticing challenge for those interested in artificial creativity, as music is generally considered to be the most mathematical of all the arts. Various aspects of music at both the physical and compositional level exhibit a very strong degree of structure that can be described mathematically, and conversely elements of mathematics have been directly employed by composers in the creation of their work. This provides a strong argument for music as one of the best suited art forms for analysis by AI, as musical data may be meaningfully digested computationally and consists of patterns and structures that may apparently be learned and predicted. 
 	
-	%TODO: Give examples of AI-composed music
 	In practice however, AI still has a long way to go. Much exploration has been made with the goal of finding an algorithm that produces satisfactory results, but as of yet even the most state of the art musical AIs have clear flaws and limitations. Most ``successful'' AI is specialized for a specific region of composition; common choices include harmonization \cite{freitas2011melody}, jazz improvisation \cite{franklin2001multi}, and full orchestral composition \cite{diaz2011composing}. The best performers within their respective regions produce work that is subjectively assessed as approximately equal to that of a novice composer. Most such work contains noticeable idiosyncrasies however, and despite being able to create amateur-level music the AI consistently fails to produce work comparable with that of skilled composers at even a small probability. This is generally attributed by both artists and certain AI specialists as a lack of creativity; although the AI is skilled at applying certain musical concepts effectively it does not feature the combination of novelty and coherency common to human work. This is not to say that AI as we currently know it is not capable of composition at a human-like level, but that current methods fall short of the mark.
 	
 	\subsection{Current Challenges}
@@ -113,7 +116,13 @@
 	
 	Beyond the more abstract difficulties involved however, there are significant technical challenges in replicating human-like musical composition. These include the compositional complexity of most musical pieces (even music considered relatively simple), the colossal variety of styles and genres of music in existence, and the difficulty in obtaining data relating to human appreciation of music. Most AI research thus far has primarily been concerned with creating a robust model for the complex patterns present in real music; typically the goal is either to imitate elements of a pre-specified corpus of music \cite{paiement2007generative,todd1989connectionist} or produce wholly original work according to some prior-defined style \cite{diaz2011composing,burton1998hybrid,horowitz1995representing}. 
 	
-	Despite numerous attempts using a wide range of AI methods (described further in section \ref{sec:abstract-methods}) there have been few significant successes in achieving this goal. The most notable of these is Iamus, a supercomputer running software based on the Melomics system \cite{diaz2011composing}, and the first computer to compose professional contemporary classical music in its own style \cite{scientist2012computer}. This system used an evolutionary algorithm with manually-encoded rules as a fitness function (detailed in \ref{sec:hybrid-systems}), meaning that it was directly instructed on how to produce classical music without the need for any learning to take place. Iamus' work has received mixed critical reception, although there is the strong possibility of bias resulting from the fact that composer was already known by most critics to be a computer. Although this is a very impressive technical feat, it has not lead to any kind of industry adoption or significant public interest within the 6 years that have followed. This can be attributed to the fact that it exists as a standalone system; it does not integrate with any existing musical process and the work it produces is not in itself unique or useful.
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=1.0\textwidth]{Iamus_-_Nasciturus}
+		\caption{A brief excerpt from \textit{Nasciturus}, a two-part piece composed by the Iamus supercomputer}
+	\end{figure}
+	
+	Despite numerous attempts using a wide range of AI methods (described further in the next chapter) there have been few significant successes in achieving this goal. The most notable of these is Iamus, a supercomputer running software based on the Melomics system \cite{diaz2011composing}, and the first computer to compose professional contemporary classical music in its own style \cite{scientist2012computer}. This system used an evolutionary algorithm with a set of hand-encoded rules as a fitness function (a pair of techniques described in section \ref{sec:abstract-methods}), meaning that it was directly instructed on how to produce classical music without the need for any learning to take place. Iamus' work has received mixed critical reception, although there is the strong possibility of bias resulting from the fact that composer was already known by most critics to be a computer. Although this is a very impressive technical feat, it has not lead to any kind of industry adoption or significant public interest within the 6 years that have followed. This can be attributed to the fact that it exists as a standalone system; it does not integrate with any existing musical process and the work it produces is not in itself unique or useful.
 	
 	\section{Technology in Musical Composition}
 	\label{sec:tech-in-music}
@@ -132,7 +141,7 @@
 	\begin{figure}[h]
 		\centering
 		\includegraphics[width=1.0\textwidth]{deep-dream-example}
-		\caption{An image before and after processing by Google DeepDream}
+		\caption{An image before and after processing by Google DeepDream; \textit{credit: Google}}
 	\end{figure}
 	
 	One of the most recent well-known cases of this is Google's ``DeepDream,'' an online application that uses computer vision technology to enhance images according to detected features, morphing details to exaggerate falsely perceived visual elements (quite commonly biological) resulting in a highly surreal output reminiscent of dreams or hallucinations. This has received popular attention as potentially a form of true AI-created art, with numerous articles discussing the philosophical consideration that it could be considered true art \cite{rayner2016google,galperina2015google} and an actual art exhibition featuring its work \cite{campbell2016inside}.
@@ -142,7 +151,7 @@
 	\section{Project Aims}
 	\label{sec:project-aims}
 	
-	The aim of this research project is to attempt to bridge some of the gap between the current theoretical state of algorithmic composition and the practical reality of AI in music. The final goal is the development of an algorithm that provides useful melodic material based on the work of a human composer in a manner that is realistically applicable to human composition.
+	The aim of this research project is to attempt to bridge some of the gap between the current theoretical state of algorithmic composition and the practical reality of AI in music. The final goal is the development of an algorithm that provides useful melodic material based on the work of a human composer in a manner that is realistically applicable to human composition: a complementary composer, or co-composer, to the human.
 	
 	To be considered successful, this algorithm must demonstrate the ability to generate melodic music in a style that is similar to that of an existing musical piece. As the goal in this case is not to simply create a complete song independently but to assist a human in the creation of their own song, the algorithm should not operate fully autonomously. Instead, the algorithm must be able to take musical input from the user and attempt to build on that input in some way. Possible functions to increase gain to the user, such as allowing the user to direct the algorithm's composing via some interactive means are also being searched for. Finally, the program must be be such that its use is feasible in a typical modern compositional context: there must be no hardware, time, or manpower requirements that would be extraordinary for a single musician working independently.
 	
@@ -166,56 +175,50 @@
 	\section{The MIDI Standard}
 	\label{sec:midi}
 	
-	The MIDI (Musical Instrument Digital Interface) standard was published in 1983 as a universal interface for synthesizers  \cite{swift1997brief}. The design of MIDI was such that the format could provide full musical control over any synthesizer device, and enabled communication between any pair of MIDI-enabled devices. The upshot of this was that the MIDI format served as a new kind of compositional notation that could be read and played automatically by any synthesizer device. This later came to include computers with the invention of software synthesizers (discussed in \ref{sec:tech-in-music}), ultimately enabling the use of the PC as a full composer's studio, with the ability to write music with any number of different instruments and have it played back live. 
-	% TODO: Expand these two sections, and fix up the accuracy and wording; you can talk more about the specifics of what they do and also make sure stuff is really correct/not misleading
-	The MIDI standard is used in most software that deals with music (as opposed to specifically audio), such as DAWs. It is especially useful for algorithmic composition, as it provides a machine-readable format that supports any kind of music with a rich selection of supporting libraries and applications. From an application perspective it is easy to read, write, and play back MIDI files, removing the need to rely on any external application to generate and display a composition. 
+	The MIDI (Musical Instrument Digital Interface) standard was published in 1983 as a universal interface for synthesizers  \cite{swift1997brief}. The design of the MIDI standard was such that different MIDI-enabled devices could communicate musically between each other, allowing one MIDI device (typically a synthesizer) to pass its input along to several others. The upshot of this was that MIDI served as a means for many different electronic instruments to be directed by a single controller, such as a synthesizer or computer, providing a major benefit to electronic music composition. Later on with the invention of software synthesizers (discussed in \ref{sec:tech-in-music}) MIDI has become a standard file format for virtually any application that works with music composition in some way, most notable DAWs. It is especially useful for algorithmic composition, as it provides a machine-readable music notation with a rich selection of supporting libraries and applications. From an application perspective it is easy to read, write, and play back MIDI files, removing the need to rely on any external application to generate and display a composition. 
 	
-	% TODO: Clean this up, make it clearer
-	The format used by MIDI files is event-based, meaning that every element of a piece of music is recorded as an event happening at some point in time. Time in MIDI files is represented by using a measure called ``ticks,'' whose duration can be set but is typically (and by default) 192 ticks per musical beat, whose duration varies with tempo. Examples of events include note start, note stop, tempo change, instrument change, and repeat section. Each event has a number of parameters, one of which is the type, one of which is the time in ticks as measured from the last event in the track, and the rest of which are usually type-specific (such as pitch or tempo values). Furthermore each MIDI file can contain several tracks, each with their own separate sets of events; these typically represent a single instrument each although each track can play many notes at once. 
+	
+	The format used by MIDI tracks is event-based, meaning that each piece of music consists of a series of one-time events, arranged to occur at specified times. Examples of events include \textit{note start}, \textit{note stop}, \textit{tempo change}, \textit{instrument change}, and \textit{repeat section}. Time in MIDI tracks is represented using a measure called ``ticks,'' whose duration can be set but is typically (and by default) 192 ticks per musical beat, the duration of which varies with tempo (and has the default value of 120 beats per minute). The reason for this particular time is that $192 = 3 \cdot 2^6$, which allows beats to be divided into all common note divisions (such as triplets or semiquavers) while also being fine-grained enough to capture the minute imperfections in timing present in live human performance. Each MIDI event has a number of parameters, one of which is the type of event, another of which is the time at which the event occurs (measured in number of ticks from the previous event), and the rest of which are usually type-specific (such as pitch or tempo values). Furthermore each MIDI file can contain several tracks, each with their own separate sets of events; these typically represent a single instrument each. 
 	
 	\section{Abstract Methods for Algorithmic Composition}
 	\label{sec:abstract-methods}
 	
-	%TODO: You really need to figure out what you're doing with this section mang
-	Many common types of AI techniques have been used in some way for algorithmic composition. The majority of these techniques can be broadly categorised as one of:
+	Many different types of AI techniques have been used in some way for algorithmic composition. The majority of these techniques can be broadly categorised as being one or more of:
 	\begin{itemize}
 		\item Knowledge-based models
 		\item Supervised learning
 		\item Evolutionary algorithms
-		\item Hybrid models
 	\end{itemize}
-	Each one of these categories carries its own set of advantages and disadvantages which greatly influence the properties of the output it produces. Although techniques from each of these categories can be used for almost any kind of compositional task, different techniques may result in completely different behaviour from the resulting AI. In particular there is a great diversity in the type of input used by algorithms to generate music, which has a large impact on their usability for certain tasks. 
+	Each one of these sets of techniques carries its own set of advantages and disadvantages which greatly influence their usefulness in composition. Although none of these categories are uniquely specialized for one particular set of compositional tasks, different techniques may result in completely different behaviour from the resulting AI. In particular there is a great diversity in the type of input used by these algorithms to generate music, which has a large impact on their usability within certain areas.
 	
 	\subsection{Knowledge-Based Models}
 	\label{sec:knowledge-systems}
 	
 	Knowledge-based models use explicitly stored knowledge of some variety to perform computation. They are one of the more intuitive and easy-to-use types of AI, and represent the vast majority of early digital methods for algorithmic composition. There are generally two ways in which this knowledge is obtained; either it is explicitly added by the programmer when the AI is created, or it is learned implicitly from a set of sample cases. The former case has the clear weakness that it can only produce music that it has been explicitly taught how to produce; this puts a harsh limit on the versatility and creativity of the AI. Nonetheless this can be quite an appealing method to use, due to both its computational simplicity and the fact that it can be directly inscribed with compositional principles derived from well-established music theory. Implicitly obtained knowledge on the other hand is much more versatile but is heavily reliant on the quantity and quality of the data provided. The extraction of knowledge from a training set is also a difficult task with many possible solutions - this may also be validly categorised as supervised learning, but is listed here for simplicity's sake. 
 	
-	%TODO: Find citations for your broad statements, e.g. popularity
-	One of the main types of knowledge used in knowledge-based systems is a set of rules/constraints, which is combined with an algorithm that produces an output satisfying these constraints. These techniques are attractive as they have the most direct analogue to music theory. Due to their heavily restricted form however, they are typically poorly suited to performing pure composition. Instead they are typically focused on broad but well-constrained tasks such as harmonization \cite{thomas1985vivace} or jazz improvisation over existing melodies \cite{horowitz1995representing}. Notably in recent decades there has been a significant shift from the use of hard satisfaction of constraints to probabilistic and optimizing methods.
+	One of the main types of knowledge used in knowledge-based systems is a set of rules/constraints, which is combined with an algorithm that produces an output satisfying these constraints. These techniques are attractive as they have the most direct analogue to music theory. Due to their heavily restricted form however, they are typically poorly suited to performing pure composition. Instead they are typically focused on broad but well-constrained tasks such as harmonization \cite{thomas1985vivace} or style-specific improvisation over existing melodies \cite{horowitz1995representing}. Notably in recent decades, there has been a general shift from the use of hard satisfaction of constraints to stochastic and optimization-based methods, which typically demonstrate increased versatility.
 	
 	Another common way to store knowledge is as a formal grammar. A formal grammar defines a kind of formal language consisting of a set of symbols that may be arranged according to strict hierarchical structural rules. By creating a grammar that uses musical elements of some kind as its basic symbols, the set of rules used by the grammar can be used to model a style of composition. This is useful when applied to music, due to the natural geometric structure behind most musical composition. However it can also be noted that formal grammars are limited in the degree to which they can comprehend long-term context, an important feature of music that formal grammars struggle to address \cite{moorer1972music}.	 
 	
-	%TODO: Definitely do this more in-depth, ANNs merit plenty of explanation (and so do HMMs to an extent)
 	\subsection{Supervised Learning}
 	\label{sec:supervised-learning}
 	
-	Supervised learning is a subset of machine learning, in which the learning model is trained to approximate some function using a set of clearly defined example inputs and outputs. It is generally applied for tasks involving large-scale data analysis of some kind, such as classifying data samples or identifying relationships between variables in a dataset. It can also be applied to fairly complex decision-based tasks however, as in the case of algorithmic composition. Generally speaking, most supervised learning techniques used for algorithmic composition attempt to model music as a sequential pattern of notes, each associated with some corresponding output depending on the task (such as the subsequent note in melody composition or a harmony in harmonization). This can be considered a specific form of pattern prediction; by understanding the relationship between each set of notes played in a song, you can predict new notes based on a given piece. Due to the popularity and effectiveness of supervised learning in general, it is one of the more popular methods for algorithmic composition. There are two particular classes of supervised learning techniques that are frequently used in algorithmic composition that will be covered here.
+	Supervised learning is a subset of machine learning, in which the learning model is trained to approximate some function using a set of clearly defined example inputs and outputs. It is generally applied for tasks involving large-scale data analysis of some kind, such as classifying data samples or identifying relationships between variables in a dataset. It can also be applied to fairly complex decision-based tasks however, as in the case of algorithmic composition. Generally speaking, most supervised learning techniques used for algorithmic composition attempt to model music as a sequential pattern of notes, each associated with some corresponding output depending on the task (such as the subsequent note in melody composition or a harmony in harmonization). This can be considered a specific form of pattern prediction; by understanding the relationship between each set of notes played in a song, you can predict new notes based on a given piece. Due to the popularity and effectiveness of supervised learning in general, it is one of the more popular methods for algorithmic composition. There are two particular classes of supervised learning techniques that are frequently used in algorithmic composition, artificial neural networks and hidden Markov models, that are explained in sections \ref{sec:ann-overview} and \ref{sec:markov-overview} respectively.
 	
-	\subsubsection{Artificial Neural Networks}
+%	\subsubsection{Artificial Neural Networks}
+%	
+%	Artificial neural networks (ANNs) are a supervised learning technique that attempt to emulate the actions of neurons within the human brain, useful for their ability to learn arbitrary mappings from one domain to another. This is very useful for composition as network designs can easily be adapted to different compositional tasks or combined with another techniques (see \ref{sec:hybrid-systems}). The majority of ANNs used in music are recurrent neural networks (RNNs), which have a form of ``memory'' allowing them to model sequences of inputs and understand context. Because of this RNNs are powerful tools for composing short melodies and harmonization. They do however still largely fall short at understanding long-term context and at forming coherent song structure. Additionally as in most ML algorithms, the performance of an ANN is heavily dependent on the musical representation used. Because the inputs to a network are strings of numerical (typically binary) values, the music must be translated into an appropriate format, which the ANN must then learn features from. Because of this a representation in which important features are distinctly visible will heavily outperform one in which those features are more obscured.
+%	
+%	\subsubsection{Markov Models}
+%	\label{sec:markov-models}
+%		
+%	The other major class in supervised learning are Markov models. A Markov model is a model representing a stochastic process which transitions through a set of states, where the transition probability is dependent only on the current state (i.e. there is no context or memory). The simplest of these is the Markov chain, which simply acts as a state machine where each state emits a fixed output when arrived at and then probabilistically transitions to another based only on the current state. At first glance this appears to be a crippling weakness, as music is intrinsically involves building on a history of musical events; there are a few ways in which this is resolved. Such methods include \textit{n}-order Markov chains, which have memory of the previous \textit{n} states, or the combination of a Markov chain with other processes. These methods have a limited effectiveness, but still display some stark idiosyncrasies that feel ``out of place'' in a melody. More commonly in recent years however is the use of the hidden Markov model (HMM), in which the exact state of the model at any given time is unknown, and each state outputs values with a certain probability. Training this model involves optimizing both the transition and output probabilities to fit the entire length of the training set, resulting in a much more sophisticated overall model. As a result HMMs see much more use in composition, primarily in non-melodic tasks such as harmonization or rhythm.
 	
-	Artificial neural networks (ANNs) are a supervised learning technique that attempt to emulate the actions of neurons within the human brain, useful for their ability to learn arbitrary mappings from one domain to another. This is very useful for composition as network designs can easily be adapted to different compositional tasks or combined with another techniques (see \ref{sec:hybrid-systems}). The majority of ANNs used in music are recurrent neural networks (RNNs), which have a form of ``memory'' allowing them to model sequences of inputs and understand context. Because of this RNNs are powerful tools for composing short melodies and harmonization. They do however still largely fall short at understanding long-term context and at forming coherent song structure. Additionally as in most ML algorithms, the performance of an ANN is heavily dependent on the musical representation used. Because the inputs to a network are strings of numerical (typically binary) values, the music must be translated into an appropriate format, which the ANN must then learn features from. Because of this a representation in which important features are distinctly visible will heavily outperform one in which those features are more obscured.
+	\subsection{Evolutionary Algorithms}
+	\label{sec:evolutionary-algorithms}
 	
-	\subsubsection{Markov Models}
-	\label{sec:markov-models}
+	Evolutionary algorithms (EAs) are a relatively recent addition to the algorithmic composition landscape, with the first cases appearing in the early 90s but the majority of successful attempts being made post-2000. EAs are an interesting class of problem solver in that they do not directly solve the problems they are applied to, but instead are a kind of optimization algorithm. One of the keys to an EA is the fitness function it is given; the goal of the EA is to find a solution for which this function gives a maximum/minimum output. In the context of music, defining a good fitness function is in itself a very difficult challenge - doing so would mean being able to objectively determine the quality of a musical piece, which is already a major element of the problem of algorithmic composition. Because of this it is quite common to combine EAs with other techniques which are used as a fitness function in some capacity. Two of the most common examples of this are training ANNs to act as fitness functions on melodies by judging similarity to a training corpus \cite{burton1998hybrid,gibson1991neurogen}, and using a set of rules to judge the musicality of a melody \cite{mcintyre1994bach}. There also exist EAs that interact with the user to evaluate fitness, overcoming the difficult in objectively defining quality by directly using a subjective assessment. Unfortunately these systems typically require a large amount of user input to reach an acceptable output, making them ineffective as an automatic composer. 
 		
-	The other major class in supervised learning are Markov models. A Markov model is a model representing a stochastic process which transitions through a set of states, where the transition probability is dependent only on the current state (i.e. there is no context or memory). The simplest of these is the Markov chain, which simply acts as a state machine where each state emits a fixed output when arrived at and then probabilistically transitions to another based only on the current state. At first glance this appears to be a crippling weakness, as music is intrinsically involves building on a history of musical events; there are a few ways in which this is resolved. Such methods include \textit{n}-order Markov chains, which have memory of the previous \textit{n} states, or the combination of a Markov chain with other processes. These methods have a limited effectiveness, but still display some stark idiosyncrasies that feel ``out of place'' in a melody. More commonly in recent years however is the use of the hidden Markov model (HMM), in which the exact state of the model at any given time is unknown, and each state outputs values with a certain probability. Training this model involves optimizing both the transition and output probabilities to fit the entire length of the training set, resulting in a much more sophisticated overall model. As a result HMMs see much more use in composition, primarily in non-melodic tasks such as harmonization or rhythm.
-	
-%	\subsection{Evolutionary Algorithms}
-%	\label{sec:evolutionary-algorithms}
-%	
-%	Evolutionary algorithms (EAs) are a relatively recent addition to the algorithmic composition landscape, with the first cases appearing in the early 90s but the majority of practical attempts being made post-2000. EAs are an interesting class of problem solver in that they do not directly solve the problems they are applied to, but instead are a kind of optimization algorithm. One of the keys to an EA is the fitness function it is given; the goal of the EA is to find an optimal input for this function. In the context of music, defining a good fitness function is in itself a very difficult challenge - doing so would mean being able to objectively determine the quality of a musical piece, which is already a major component of the problem of algorithmic composition. Because of this it is quite common to combine EAs with other techniques for use as a fitness function in some capacity. Two of the most common examples of this are training ANNs to act as fitness functions on 
-%	
 %	% TODO Plenty of stuff to fill in here
 %	
 %	\subsection{Hybrid Systems}
@@ -294,6 +297,7 @@
 	The backpropagation algorithm is a form of optimization method, where the objective is to minimize the output error of the ANN being trained. This error is calculated by activating the ANN with a test input, then calculating the difference between the ANN's output and the correct output as a derivative of the connection weights in the network. These error values are then used to adjust the weights of the connections via gradient descent (or some similar method). This is repeated for a number of epochs, with the ANN moving towards a more accurate model of the target function each time. As with most optimization-based learning algorithms, this process is vulnerable to becoming stuck in local minima. It can therefore be effective in certain cases to retrain a network several times and select the best performing as the final model.
 	
 	\section{Markov Models}
+	\label{sec:markov-overview}
 	
 	Markov models are another class of supervised learning method, which attempt to model sequential data as a stateful stochastic process without memory. Although there are several different types of specific models based on this method, they can all be described by a set of states and probabilistic transition functions between these states; typically this is represented by some form of directed graph. Markov models are often used to model probabilistic processes in which all the relevant information of the system can be captured in a single pre-defined state. Different types of Markov model are applicable to quite different tasks owing to their special properties; for example, Markov chains are useful for modelling certain natural processes, particularly in physics or chemistry simulations, while partially observable Markov decision processes (POMDPs) are useful for problems such as automated robot navigation.
 	
@@ -409,88 +413,85 @@
 	
 	An alternative simple RNN to the Jordan network as described above is the Elman network \cite{elman1990finding}. The topology of an Elman network is similar to that of a Jordan network, but with different recurrent connections. While in the Jordan network the recurrent feedback is received in the input layer, in the Elman network it is instead received in the hidden layer. The specific model of Elman network for composition described here is as designed by Coca, Romero, and Zhao \cite{coca2011generation}.
 	
-	\begin{figure}[!ht]
-		\centering
-		\begin{tikzpicture}[
-		plain/.style={
-			draw=none,
-			fill=none,
-		},
-		dot/.style={draw,shape=circle,minimum size=3pt,inner sep=0,fill=black
-		},
-		net/.style={
-			matrix of nodes,
-			nodes={
-				draw,
-				circle,
-				inner sep=10pt
-			},
-			nodes in empty cells,
-			column sep=2cm,
-			row sep=-9pt
-		},
-		>=latex
-		]
-		\matrix[net] (mat)
-		{
-			|[plain]| \parbox{1.3cm}{\centering Input\\layer} & |[plain]| \parbox{1.3cm}{\centering Hidden\\layer} & |[plain]| \parbox{1.3cm}{\centering Output\\layer} \\
-			& |[plain]| & \\
-			|[plain]| & \\
-			& |[plain]| & \\
-			|[dot]| & |[plain]| \\
-			|[dot]| & & \\
-			|[dot]| & |[plain]| \\
-			& |[plain]| & \\
-			|[plain]| & \\
-			& |[plain]| & \\
-			|[plain]| & |[plain]| & |[plain]| \\
-			& |[plain]| & \\
-			|[plain]| & |[plain]| & |[plain]| \\
-			& |[plain]| & \\
-			|[plain]| & |[plain]| & |[plain]| \\
-			& |[plain]| & \\
-%			|[dot]| & |[plain]| & |[plain]| \\
-%			|[dot]| & |[plain]| & \\
-%			|[dot]| & |[plain]| & |[plain]| \\
+%	\begin{figure}[!ht]
+%		\centering
+%		\begin{tikzpicture}[
+%		plain/.style={
+%			draw=none,
+%			fill=none,
+%		},
+%		dot/.style={draw,shape=circle,minimum size=3pt,inner sep=0,fill=black
+%		},
+%		net/.style={
+%			matrix of nodes,
+%			nodes={
+%				draw,
+%				circle,
+%				inner sep=10pt
+%			},
+%			nodes in empty cells,
+%			column sep=2cm,
+%			row sep=-9pt
+%		},
+%		>=latex
+%		]
+%		\matrix[net] (mat)
+%		{
+%			|[plain]| \parbox{1.3cm}{\centering Input\\layer} & |[plain]| \parbox{1.3cm}{\centering Hidden\\layer} & |[plain]| \parbox{1.3cm}{\centering Output\\layer} \\
+%			& |[plain]| & \\
+%			|[plain]| & \\
+%			& |[plain]| & \\
+%			|[plain]| & \\
+%			& |[plain]| & \\
+%			|[plain]| & \\
 %			& |[plain]| & \\
 %			|[plain]| & |[plain]| & |[plain]| \\
 %			& |[plain]| & \\
 %			|[plain]| & |[plain]| & |[plain]| \\
 %			& |[plain]| & \\
-%			|[dot]| & |[plain]| & |[plain]| \\
-%			|[dot]| & |[plain]| & \\
-%			|[dot]| & |[plain]| & |[plain]| \\
-%			& |[plain]| & |[plain]| \\
-		};
-		% Input arrows
-		\foreach \ai [count=\mi ]in {2,4}
-			\draw[<-] (mat-\ai-1) -- node[above] {Pitches \mi} +(-2cm,0);
-		\draw[<-] (mat-8-1) -- node[above] {Pitches 7} +(-2cm,0);
-		\draw[<-,align=center] (mat-10-1) -- node[above] {Lower \\ Octave} +(-2cm,0);
-		\draw[<-,align=center] (mat-12-1) -- node[above] {Higher \\ Octave} +(-2cm,0);
-		\foreach \ai [count=\mi ]in {14,16}
-			\draw[<-] (mat-\ai-1) -- node[above] {Duration \mi} +(-2cm,0);
-		% Input -> Hidden
-		\foreach \ai in {2,4,6,8,10}
-		{\foreach \aii in {3,6,9}
-			\draw[->] (mat-\ai-1) -- (mat-\aii-2);
-		}
-		% Hidden -> Hidden
-		\foreach \ai in {3,6,9}
-			\draw[->] (mat-\ai-2) edge[in=150,out=30,loop] (mat-\ai-2);
-		% Hidden -> Output
-		\foreach \ai in {3,6,9}
-		{\foreach \aii in {2,4,6,8,10}
-			\draw[->] (mat-\ai-2) -- (mat-\aii-3);
-		}
-		% Output Arrows
-		\foreach \ai [count=\mi ]in {2,4,6,8,10}
-		\draw[->] (mat-\ai-3) -- node[above] {Ouput \mi} +(2cm,0);
-		\end{tikzpicture}
-		\caption{An example of a variety of Elman network}
-	\end{figure}
+%			|[plain]| & |[plain]| & |[plain]| \\
+%			& |[plain]| & \\
+%%			|[dot]| & |[plain]| & |[plain]| \\
+%%			|[dot]| & |[plain]| & \\
+%%			|[dot]| & |[plain]| & |[plain]| \\
+%%			& |[plain]| & \\
+%%			|[plain]| & |[plain]| & |[plain]| \\
+%%			& |[plain]| & \\
+%%			|[plain]| & |[plain]| & |[plain]| \\
+%%			& |[plain]| & \\
+%%			|[dot]| & |[plain]| & |[plain]| \\
+%%			|[dot]| & |[plain]| & \\
+%%			|[dot]| & |[plain]| & |[plain]| \\
+%%			& |[plain]| & |[plain]| \\
+%		};
+%		% Input arrows
+%		\draw[<-,align=center] (mat-2-1) -- node[above] {4 Major \\ Pitches} +(-2cm,0);
+%		\draw[<-,align=center] (mat-4-1) -- node[above] {3 Minor \\ Pitches} +(-2cm,0);
+%		\draw[<-,align=center] (mat-6-1) -- node[above] {2 Octaves} +(-2cm,0);
+%		\draw[<-,align=center] (mat-8-1) -- node[above] {2 Octaves} +(-2cm,0);
+%		\foreach \ai [count=\mi ]in {14,16}
+%			\draw[<-] (mat-\ai-1) -- node[above] {Duration \mi} +(-2cm,0);
+%		% Input -> Hidden
+%		\foreach \ai in {2,4,6,8,10}
+%		{\foreach \aii in {3,6,9}
+%			\draw[->] (mat-\ai-1) -- (mat-\aii-2);
+%		}
+%		% Hidden -> Hidden
+%		\foreach \ai in {3,6,9}
+%			\draw[->,line width=0.3mm] (mat-\ai-2) edge[loop right] (mat-\ai-3);
+%		% Hidden -> Output
+%		\foreach \ai in {3,6,9}
+%		{\foreach \aii in {2,4,6,8,10}
+%			\draw[->] (mat-\ai-2) -- (mat-\aii-3);
+%		}
+%		% Output Arrows
+%		\foreach \ai [count=\mi ]in {2,4,6,8,10}
+%		\draw[->] (mat-\ai-3) -- node[above] {Ouput \mi} +(2cm,0);
+%		\end{tikzpicture}
+%		\caption{An example of a variety of Elman network}
+%	\end{figure}
 	
-	The representation of music used by this particular network is quite different to that used in \ref{sec:todd-net}. Most distinctly it does not use the timestep representation for the temporal dimension, but instead assigns a duration value to each event. This shares the disadvantage of only allowing monophonic input/output, but places a greater emphasis on learning the temporal features of the input data. This helps overcome some of the issues mentioned earlier with regard to the ``new note'' feature. The representation for the duration of a note is given as a binary string whose actual binary value represents the duration of the note. The conversion between numerical value and musical time is such that a crotchet (quarter note) has a duration value of 96. This is the exact value used by the MIDI standard (\ref{sec:midi}), chosen such that it can represent all standard note divisions (semiquavers, crotchet triplets and quaver triplets) as well as the small irregularities in timing that occur during live performance. 
+	The representation of music used by this particular network is quite different to that used in \ref{sec:todd-net}. Most distinctly it does not use the timestep representation for the temporal dimension, but instead assigns a duration value to each event. This shares the disadvantage of only allowing monophonic input/output, but places a greater emphasis on learning the temporal features of the input data. This helps overcome some of the issues mentioned earlier with regard to the ``new note'' feature. The representation for the duration of a note is given as a binary string whose actual binary value represents the duration of the note. The conversion between numerical value and musical time is such that a crotchet (quarter note) has a duration value of 96. This is the exactly half of the value used by the MIDI standard (see \ref{sec:midi}), chosen for the same reasons as in the standard as well as the convenience in converting to/from MIDI files.
 	
 	The pitch representation is also quite different, as there is no longer a one-to-one mapping of pitches to nodes. Instead, the pitch is split into two parts: the in-octave pitch and the octave. The representation for the octave is very simple and uses only 2 nodes, with the binary mapping $10 = \text{C2-B2}$, $01 = \text{C4-B4}$, and $00 = \text{C3-B3}$, with the network's output being snapped to the closest of these values. This can easily be extended to cover a wider range with a small increase in nodes, making this representation more versatile than the one used in Todd's design. The representation for the in-octave pitch is also split into two parts, based on intervals of 4 and 3 semitones (major and minor thirds). Each circle represents a set of pitches whose relative intervals are multiples of 4 and 3 for major and minor thirds respectively. A given note is then represented as a pair of binary strings length 3 and 4 representing the index of the circles it lies in. So for example, C is encoded as 1000 100, D is encoded as 0010 001, and E is encoded as 1000 010. This is a useful representation as it models relative pitch (for certain intervals), which is more relevant in most musical structure than absolute pitch, without some of the disadvantages imposed by purely relative pitch representation such as easily straying off-key. 
 	
@@ -558,7 +559,6 @@
 	This process repeats until it the partition reaches a stable value, i.e. none of $x_1$ to $x_l$ change during an iteration. The objective of this algorithm is to find a solution that tried to maximize likelihood according to both of the models. Specifically, this algorithm is a form of the Greedy Max Cut method \cite{rohde2002methods}, a Multidimensional Scaling optimization algorithm which has proven to be optimal in terms of running time and performance for this type of search problem. Of particular importance is the constant $\lambda$, which sets a balance between the two constraints being optimized; high values of $\lambda$ prioritize the distance measure, while low values prioritize the HMM.
 	
 	
-	
 	\chapter{Project Execution}
 	\label{chap:execution}
 	
@@ -566,42 +566,42 @@
 	
 	\section{Design}
 	
-	The algorithm being selected and adapted for this project is intended to fulfil the goals discussed in \ref{sec:project-aims}, but these stated aims leave a huge degree of room for the implementational details of the algorithm. As touched on in section \ref{sec:abstract-methods}, there are many different ways to perform algorithmic composition, and the ``ideal'' method is entirely dependent on the exact requirements of the user. In this section these requirements are detailed and a pair of algorithms that satisfy them are given. 
+	The algorithm being selected and adapted for this project is intended to fulfil the goals discussed in \ref{sec:project-aims}, but these stated aims leave a large amount open in terms of the implementational details of the algorithm. As touched on in the previous chapter, there are many different ways to perform algorithmic composition, and the ``ideal'' method is entirely dependent on the exact requirements of the user. In this section these requirements are detailed and a pair of algorithms that satisfy them are given. 
 	
 	\subsection{Requirements and Objectives}
 	
-	To briefly recap the aims in \ref{sec:project-aims}, the algorithm was to be designed such that it is able to build on existing melodic material in a way that is both musically sound and consistent with the material's style. This is a fairly open-ended task that can be fulfilled in many different ways by many different means. Given the scope of this project it was therefore important that the limits of this algorithm be well-defined from the outset. Some of the factors that needed to be taken into consideration when defining these limits were the melodic properties (e.g. harmonies, long-term song structure, rhythmic micro-variations) recognized by the algorithm, the hardware and data requirements, and the execution time of the melody generation process. 
+	To briefly recap the aims in \ref{sec:project-aims}, the algorithm needed to be designed such that it could build on existing melodic material in a way that is both musically sound and consistent with the original material's style. This is a fairly open-ended task that could be fulfilled in many different ways using a variety of methods. Given the scope of this project it was therefore important that the limits of this algorithm be well-defined from the outset. Some of the factors that needed to be taken into consideration when defining these limits were the melodic properties (e.g. harmonies, long-term song structure, rhythmic micro-variations) recognized by the algorithm, the hardware and data requirements, and the execution time of the melody generation process. 
 	
-	One of the most significant limitations to the algorithm's design was the number of simultaneous musical elements it would be able to process, i.e. monophonic or polyphonic melody and the use of multiple instruments within a melody. It is easy to see that allowing for more notes and voices to be played at the same would increase the complexity of the algorithm to a large degree; exactly to what extent depends on the details of the algorithm. Some methods are easily adapted or are fundamentally built around the concept of simultaneous notes \cite{boenn2008automatic}, while others use musical representations that would need to be completely overhauled to enable polyphony \cite{todd1989connectionist}. While polyphonic melody construction and harmonization play major roles in composition, they add a degree of complexity to the output that would greatly increase the difficulty of achieving a suitable result within this research, both due to algorithmic complexity and a significant increase in the difficulty of testing. The same applies to the inclusion of multiple instruments - especially if the algorithm is to understand the difference between their sounds in relation to music. Because of this, the algorithm was designed to read and write only single-voiced monophonic melodies. 
+	One of the most significant limitations to the algorithm's design was the number of simultaneous musical elements it would be able to process, i.e. monophonic versus polyphonic melody, and the use of multiple instruments within a melody. It is easy to see that allowing for more notes and voices to be played at the same time may increase the complexity of the algorithm to a large degree; exactly to what extent (if at all) depends on the details of the algorithm. Some methods are easily adapted or are fundamentally built around the concept of simultaneous notes \cite{boenn2008automatic}, while others use musical representations that would need to be completely overhauled to enable polyphony \cite{todd1989connectionist}. While polyphonic melody construction and harmonization play major roles in composition, they add a degree of complexity to the output that would greatly increase the difficulty of achieving a suitable result within this research, both due to algorithmic complexity and a significant increase in the difficulty of testing. The same applies to the inclusion of multiple instruments - especially if the algorithm is to understand the difference between their sounds in relation to music. Because of this, the algorithm was designed to read and write only single-voiced monophonic melodies. 
 	
-	The other major feature that needed to be considered for the algorithm's design was its ability to recognize long-term features of a melody. This includes recurring motifs, common rhythm patterns, repeating variations of phrases, and recognizing sections such as the verse and chorus. Being able to recognize and predict these features is a weakness of most compositional AI, as the relationships between distant measures are often quite complex and can be difficult to model computationally, although some attempts have been made to specifically target this problem \cite{tokui2000music,paiement2007generative}. This particular algorithm exists in an interesting position with regard to this situation: Input from the user can be used to label these features, making it much easier for the algorithm to use them; but as the algorithm merely produces material for the user to create a song with, it is simultaneously less important that the algorithm actually focus on long-term features. As a result, the decision of how much the algorithm should try to capture long-term structure was a balance between utility to a potential user and the additional effort required by the user to operate this feature. Ultimately it was determined that putting a great deal of emphasis on true long-term features would be mostly useless for the algorithm, as there is no desire for it to actually arrange songs from such a high level; while such an algorithm might be useful for composers in some contexts, it is quite tangential to the particular goals of this research. Instead the algorithm should only attempt to learn features over shorter periods of several measures or phrases, giving it suitable context to produce human-like material in most circumstances while not requiring a significantly more complex design or degree of user interaction. 
+	The other major feature that needed to be considered for the algorithm's design was its ability to recognize long-term features of a melody. This includes recurring motifs, common rhythm patterns, repeating variations of phrases, and recognizing sections such as the verse and chorus. Being able to recognize and predict these features is a weakness of most compositional AI, as the relationships between distant measures are often quite complex and can be difficult to model computationally, although some attempts have been made to specifically target this problem \cite{tokui2000music,paiement2007generative}. This particular algorithm is an interesting case for this situation: Input from the user can be used to label long-term features, making it much easier for the algorithm to make use of them; but as the algorithm merely produces material for the user to incorporate into their own music, it is also less important that the algorithm actually be able to use long-term features. As a result, the decision of how much the algorithm should try to capture long-term structure was a balance between utility to a potential user and the additional effort required by the user to operate this feature. Ultimately it was determined that putting a great deal of emphasis on true long-term features would be mostly useless for the algorithm, as there is no desire for it to actually arrange songs from such a high level; while such an algorithm might be useful for composers in some contexts, it is somewhat tangential to the primary goals of this research. Instead the algorithm should attempt to learn features over shorter periods of several measures or phrases, giving it suitable context to produce immediately-fitting material in most circumstances while not requiring a significant increase in design complexity or user interaction. 
 	
-	Beyond the algorithm's pure ability to model music, there are additional constraints posed by the problem. The most obvious of these is time, a particularly sensitive aspect as the AI is intended to be used by individuals as a tool for creative work. While the algorithm presented in this work is not intended to be a finished product suitable for practical use, if it fundamentally has a high asymptotic time complexity then it may never be useful in any real scenario. Another important factor is the reliance of the algorithm on data. This is notably only a factor at all for supervised learning techniques, but it is particularly discouraging in the case of music as useful musical data (such as well-formatted MIDI songs) can be hard to obtain (see \ref{sec:midi-data}). Finally the algorithm should feature some degree of non-determinism. The reason for this is that there is virtually no way to guarantee that the algorithm's output is useful to the user; even if it can be considered musically sound in all senses and fits perfectly into the original melody, it may simply not be to the user's liking. It is therefore necessary that the user can view a range of material to be inspired from, to maximize the algorithm's possible utility.
+	Beyond the algorithm's pure ability to model music, there are additional constraints posed by the problem. The most obvious of these is time, a particularly sensitive aspect as the AI is intended to be used by individuals engaged in creative work. While the algorithm presented in this work is not intended to be a finished product suitable for practical use, if it has an intrinsically high asymptotic time complexity then it might never be useful in most real-world scenarios. Another important factor is the reliance of the algorithm on data. This is notably only a factor at all for supervised learning techniques, but it is particularly discouraging in the case of music as useful musical data (such as well-formatted MIDI songs) can be hard to obtain (see \ref{sec:midi-data}). Finally the algorithm should feature some degree of non-determinism. The reason for this is that there is virtually no way to guarantee that the algorithm's output is useful to the user; even if it is considered musically sound and fits perfectly into the original melody, it may simply not be to the user's liking. It is therefore necessary that the user be able to select from a range of material, to maximize the algorithm's possible utility.
 
-	Additional features such as modelling human-like imperfections in performance or musical dynamics were considered, but deemed to be tertiary to the core goals of the algorithm. This and the above comprised the basic functional requirements for the algorithm. These requirements still leave a great deal 
-	open about the algorithm, both in its implementation details and exactly how its success in imitating a style and producing coherent output is measured.
+	Additional features such as modelling human-like imperfections in performance or musical dynamics were considered, but deemed to be tertiary to the core goals of the algorithm - these are not relevant features in all cases and their use varies largely across genres. This and the above comprised the basic functional requirements for the algorithm. These requirements still left a great deal 
+	open about the algorithm, both in the details of its implementation and exactly how its success in imitating a style and producing coherent output was to be measured.
 
 	\subsection{Algorithm Selection}
 	\label{sec:algorithm-selection}
 	
-	One of the most promising avenues from the outset appeared to be evolutionary algorithms, although they did not prove ultimately suitable. The main advantage of EAs in music is that they search the space of possible melodies by assigning a fitness score to each melody that they consider; this is trivially made into a user-driven selection process by allowing the user to assign fitness scores, ensuring that higher quality melodies are successfully selected for. This method has some unfortunate drawbacks however, with the first and foremost being that EAs typically attempt an enormous number of solutions before reaching a passable solution, especially when working in a large domain with many dimensions such as melodies. This results in an unacceptable level of fatigue being inflicted on the user rating the melodies. There have been numerous attempts to overcome this problem, using methods such as clustering similar results to avoid presenting the user with many similar melodies \cite{burton1998hybrid,ralley1995genetic}, or trying to minimize the number of evolutionary iterations \cite{marques2010interactive}. While these methods do show some promise, it is still a substantially difficult task to compose a melody of sufficient quality with a small enough time and interaction count to be appropriate for this task.
+	One of the most promising avenues from the outset appeared to be evolutionary algorithms. The main advantage of EAs in music is that they search the space of possible melodies by assigning a fitness score to each melody that they consider; this is trivially made into a user-driven selection process by allowing the user to assign fitness scores, ensuring that higher quality melodies are successfully selected for. This method has an unfortunate drawback however, being that EAs typically attempt an enormous number of solutions before reaching a passable solution, especially when working in a large domain with many dimensions such as melodies. This results in an unacceptable level of fatigue being inflicted on the user rating the melodies. There have been a few attempts to overcome this problem, using methods such as clustering similar results to avoid presenting the user with many similar melodies \cite{burton1998hybrid,ralley1995genetic}, or trying to minimize the number of evolutionary iterations \cite{marques2010interactive}. While these methods do show some promise, it is still a substantially difficult task to compose a melody of sufficient quality with a small enough time and interaction count to be appropriate for this particular task.
 
-	Focusing instead on the user-facing constraints of the problem suggests that the ideal algorithm would be one that performs generation quickly and at most relies on explicit user input to refine suitable results, not as a lynchpin of the generative process. The best candidates for this are the supervised learning techniques previously discussed in section \ref{sec:supervised-learning}, which learn features of melodies from a training corpus and use this model to create new melodies in the same style. This allows for rapid creation of quality work, as the majority of computation is performed prior to the generation step. In particular the two most commonly used learning techniques in algorithmic composition are hidden Markov models and recurrent neural networks. These structures are designed for learning prediction models over sequential data, and can be designed to write new music by predicting the next note at a given point in time. 
+	Focusing instead on the user-facing constraints of the problem suggests that the ideal algorithm would be one that performs generation quickly and at most relies on explicit user input to refine suitable results, not as a lynchpin of the generative process. The best candidates for this are supervised learning (\ref{sec:supervised-learning}), which learns features of melodies from a training corpus to create new melodies in the same style, and the knowledge-based techniques (\ref{sec:knowledge-systems}) which define a set of rules or constraints and create a song satisfying those constraints. These both allow for rapid creation of quality work, as the majority of the musical knowledge is obtained prior to the generation step. 
 	
-	There are some trade-offs between a supervised learning approach and a knowledge-based approach. One of the most significant advantages of supervised learning is that it is far more versatile, as it does not require any kind of hand-encoded knowledge. This is vital for an application that is intended as a generic tool for composers, as it must be able to write virtually any style of music - an infeasible goal with an entirely hand-written set of rules. It does however often suffer from an inability to learn long-term patterns very well; the general technique for using supervised learning to compose music is to predict notes as sequential data. This usually gives good results over the short term, but fails to learn relationships between distant patterns. In this particular case however, the presence of the user can mitigate this weakness by providing relevant long term features as input to the algorithm, while the issue of versatility can only be overcome if the user provides a their own set of constraints to write their songs with. Given that one of the goals in this work was to minimize the amount of work on the part of the user, it was a natural decision to user supervised learning. As a point of interest there do exist supervised learning models that learn rules from a corpus of data, potentially satisfying the major issues at hand, but it is an infrequently used technique that has not thus far have been used for melodic composition. 
+	There are some trade-offs between a supervised learning approach and a knowledge-based approach. One of the most significant advantages of supervised learning is that it is far more versatile, as it does not require any kind of hard-coded knowledge. This is vital for an application that is intended as a generic tool for composers, as it must be able to write virtually any style of music - an infeasible goal with an entirely hand-written set of base rules. It does however often suffer from an inability to learn long-term patterns very well; the general technique for using supervised learning to compose music is to predict notes as sequential data. This usually gives good results over the short term, but fails to learn relationships between distant patterns. In this particular case however, the presence of the user greatly reduces the need to model long-term features, while the issue of versatility can only be overcome if the user provides their own set of constraints to write their songs with. Given that one of the goals in this work was to minimize the amount of work on the part of the user, it was a natural decision to user supervised learning.
 	
-	Given that the focus of the algorithm's design is melodic composition, it was preferable to focus on techniques that specialize in this area; within the realm of supervised learning this would logically imply ANNs (\ref{sec:anns}). Although there exist other suitable techniques, such as rule-learning models (\ref{sec:knowledge-systems}) and HMMs (\ref{sec:markov-models}), uses of these techniques in the literature are generally focused on harmonization and counterpoint tasks rather than monophonic melodic composition. There are many ways to use ANNs for composition, such as a fitness function for some optimizing algorithm \cite{manaris2007corpus} or as part of a constraint architecture \cite{hild1992harmonet}. However ANNs have been chosen here for specific reasons (i.e. fast run-time and versatility) that will be best satisfied by a more pure approach. %TODO Don't forget to give those justifications properly before this point
+	Given that the focus of the algorithm's design is melodic composition, it was preferable to focus on techniques that specialize in this area; within the realm of supervised learning this would logically imply ANNs (\ref{sec:anns}). Although there exist other suitable techniques, such as rule-learning models (\ref{sec:knowledge-systems}) and HMMs (\ref{sec:markov-models}), uses of these techniques in the literature are generally focused on harmonization and counterpoint tasks rather than monophonic melodic composition, as they are not optimal for learning straightforward melodic sequences. There are many ways to use ANNs for composition, such as a fitness function for some optimizing algorithm \cite{manaris2007corpus} or as part of a constraint architecture \cite{hild1992harmonet}. However ANNs have been chosen here for specific reasons (i.e. fast run-time, autonomous operation, and versatility) that will be best satisfied by a more pure approach.
 	
-	Of the algorithms that were reviewed, two appeared to be well-suited to the task. These algorithms were both fairly simple implementations of RNNs, each using a relatively basic melody generation algorithm that featured no cumbersome or overly complex architecture. This ensured a good generation speed and a straightforward training process, as well as a high degree of versatility - as is typical for ANNs. The algorithms are detailed below in \ref{sec:implementation}, including references to the base algorithms as well as the modifications introduced within this work.
+	Of the algorithms that were reviewed, two appeared to be well-suited to the task. These algorithms were both fairly simple implementations of RNNs, each using a relatively basic melody generation algorithm that featured no cumbersome or overly complex architecture. The desire for simplicity in this case stems from the exploratory nature of this work - a generic system is preferred over a specialized one when the difficulties and nuances of the task have not yet been mapped out. The algorithms are detailed below in \ref{sec:implementation}, including references to the base algorithms as well as the modifications introduced within this work.
 	
 	\section{Musical Data}
 	\label{sec:midi-data}
 	
-	As both of the algorithms implemented here use supervised learning, it was necessary to train them with a set of data. This application is concerned only with the purely melodic aspects composition as opposed to dynamics or timbre, therefore only the musical score is required as input. This requirement is best satisfied by the MIDI format (\ref{sec:midi}), which directly encodes scores. This is also a convenient choice due to the availability of many useful libraries that provide functions for reading, writing, and manipulating MIDI data. 
+	As both of the algorithms implemented here use supervised learning, it was necessary to train them with a set of data. This application is concerned only with the purely melodic aspects of composition, as opposed to dynamics or timbre; therefore only the musical score is desired as input. This requirement is best satisfied by the MIDI format (\ref{sec:midi}), which directly encodes musical scores. This is also a convenient choice due to the availability of many useful libraries that provide functions for reading, writing, and manipulating MIDI data. 
 	
-	One unfortunate difficulty involved with using MIDI data, however, is availability. Due to the limited range of sound produced by MIDI synths, such as Microsoft's GS Wavetable SW Synth, it is not a popular format for storing or listening to music with. Because of this it is typically much harder to obtain a MIDI version of a song than a traditional audio recording. Furthermore this problem is particularly exaggerated for genres of music that place emphasis on timbre, such as metal or electronic dance music, making it much harder to train a model with music from those genres. 
+	One unfortunate difficulty involved with using MIDI data, however, is availability. Due to the limited range of sound produced by MIDI synths (such as Microsoft's GS Wavetable SW Synth), it is not a popular format for storing or listening to music with. Because of this it is typically much harder to obtain a MIDI version of a song than a traditional audio recording. Furthermore this problem is particularly severe for genres of music that place emphasis on the timbre, such as metal or electronic dance music, making it much harder to train a model to learn such genres. 
 	
-	To avoid this problem within the course of this project, all training data was manually inscribed. The particular music used for testing was a set of nursery rhymes, chosen for a combination of their simplicity and relative musical similarity. It is common for the number of songs used for training and testing composition algorithms to be fairly small; often fewer than 20 and almost always fewer than 100. This is due to the difficulty in obtaining songs as well as the high complexity of each individual song leading to a reduced need for more data.
+	To avoid this problem within the course of this project, all the music used was manually inscribed into MIDI. The particular music used for testing was a set of nursery rhymes, chosen for a combination of their simplicity and relative musical similarity. It is common for the number of songs used for training and testing composition algorithms to be fairly small; often fewer than 20 and almost always fewer than 100. This is due to the difficulty in obtaining songs as well as the high complexity of each individual song (meaning fewer songs are needed to teach a complex model).
 		
 	\section{Algorithm Implementation}
 	\label{sec:implementation}
@@ -632,9 +632,9 @@
 	
 	The HMM was implemented as a multinomial HMM, as defined in hmmlearn, fitted to the set of training songs in their rhythm array format. This representation is as described in (\ref{sec:distance-model}); each index of the array represents a timestep within the original melody and takes the value 0, 1, or 2 for a rest, note start, or note sustain respectively. The number of hidden states used was determined empirically for this particular dataset; notably in the results (\ref{sec:jordan-results}) the number of states required for a good result is quite small and scales well asymptotically. A high number of iterations and a low convergence tolerance were used during training as the fitting needed to be quite close in order to approximate the very strong structure of musical rhythms. In order to avoid getting trapped in local minima or saddle points, it was necessary to perform the fitting process many times with different HMMs and select the one with the best fit.
 	
-	The distance model was more complicated to implement, as there existed no python libraries (according to a fairly broad investigation) that provided support for the majority of the model's functionality. I was however able to make use of the SciPy library's k-means clustering and binomial probability mass functions. 
+	The distance model was more complicated to implement, as there existed no python libraries (according to a fairly broad investigation) that provided support for the majority of the model's functionality. It was possible however to make use of the SciPy library's k-means clustering and binomial probability mass functions, which covered some of the model's implementation. 
 	
-	The implementation of the distance model can be divided into three main parts: representation, training, and scoring. The representation of input is fundamentally similar to that of the HMM, using the same array-of-timesteps. In addition to this it is also necessary for songs to be divided into partitions as per the distance model design in \ref{sec:distance-model}. For the purposes of this research, I decided to only partition by single bars. This is a convenient division type to use due to its intrinsic link to rhythmic structure and good ratio to the length of the training set, in which each song was 8 bars long. As part of this representation I also implemented the measures $d_{i,j}$, $\beta_{i,j}$, and $\alpha_{i,j}$ as they are a fundamental part of the distance model.
+	The implementation of the distance model can be divided into three main parts: representation, training, and scoring. The representation of input is fundamentally similar to that of the HMM, using the same array-of-timesteps. In addition to this it is also necessary for songs to be divided into partitions as per the distance model design in \ref{sec:distance-model}. For the purposes of this research, only single bars were used for partitions. This is a convenient division type to use due to its intrinsic link to rhythmic structure and good ratio to the length of the training set, in which each song was 8 bars long. As part of this representation $d_{i,j}$, $\beta_{i,j}$, and $\alpha_{i,j}$ were also implemented as functions as they are a fundamental part of the distance model.
 	
 	The training function was the most complicated step of the implementation, as it uses a form of expectation-maximization. The goal of training is to learn $k$ pairs of parameters $w^{(k)}_{i,j}$ and $p^{(k)}_{i,j}$ for each pair of partitions $i$ and $j$, where $w^{(k)}_{i,j}$ corresponds to the size of an estimated subpopulation $k$ of melodies and $p^{(k)}_{i,j}$ corresponds to the probability within the subpopulation $k$ that a pair of symbols from partitions $i$ and $j$ differ. To accomplish this these parameters are first initialized using k-means clustering. Following this the EM algorithm for Binomial mixture models \cite{bilmes1998gentle} is applied iteratively until either the results converge or a maximum number of iterations is reached. 
 	
@@ -650,13 +650,13 @@
 	
 	The combination of the HMM with the distance model first uses the HMM to generate a bar of rhythm, and then uses the Greedy Max Cut algorithm \cite{rohde2002methods} to optimize that bar for a maximum combined score from the HMM and distance model. Specifically the aim is to find an approximation to:
 	$$ \max_{x_1,\dots,x_l} p_{HMM}(\{x_1,\dots,x_l\} | \{y_1,\dots,y_m\}) + \lambda \log p_{DIST}(\{y_1,\dots,y_m,x_1,\dots,x_l\}) \text{ ,} $$
-	where $\lambda$ is a constant value used to weight the relative importance of the distance measure against the HMM. Empirically I determined that higher values of $\lambda$ (I ultimately used $\lambda = 4.0$) yielded better results, as otherwise the HMM tended to overpower the distance measure.
+	where $\lambda$ is a constant value used to weight the relative importance of the distance measure against the HMM. Empirically it was determined that higher values of $\lambda$ (I ultimately used $\lambda = 4.0$) yielded better results, as otherwise the HMM tended to overpower the distance measure.
 	
 	\subsubsection{Representation}
 	
 	One of the reasons these two models can be combined well is that they both use a timestep representation for their data. Timesteps are convenient in that they are both easy to edit (such as splitting, concatenating, changing values arbitrarily) and to understand intuitively: every timestep has an equal duration, making it a useful way to determine the absolute point in time that any note is playing at in a manner similar to an actual musical score. It is not as simple to convert to and from the MIDI format as a pitch-duration representation (as used in \ref{sec:elman-implementation}), and can only represent monophonic melodies, but these drawbacks were manageable within the scope of this research project.
 	
-	A more troubling complication arises from the timestep representation when selecting the duration value for a timestep. As the domain for the model is musical scores, it makes sense to use some divisor of the duration of a whole note; fortunately the MIDI format has variables that can specify this value, allowing the application to determine a duration automatically. The choice of divisor has great significance to the power of the model however, as it is effectively a resolution value within the temporal dimension. If the timestep duration has a small divisor, such as 4, then only events occurring every quarter note can be represented; as a result the inclusion of a note or rest shorter than a crotchet (or not an exact multiple of one) would result in a very noticeable loss of information when converted to the timestep format. 
+	A more troubling complication arises from the timestep representation when selecting the duration value for a timestep. As the domain for the model is musical scores, it makes sense to use some divisor of the duration of a whole note; fortunately the MIDI format has variables that can specify this value, allowing the application to determine a duration automatically. The choice of divisor has great significance to the power of the model however, as it is effectively a resolution value within the temporal dimension. If the timestep duration has a small divisor, such as 4, then only events occurring every quarter note can be represented; as a result the inclusion of a note or rest that is not an exact multiple of one crotchet would result in a very noticeable loss of information when converted to the timestep format. 
 	
 	%TODO: Diagram
 	
@@ -683,22 +683,21 @@
 	\subsection{Elman Network with Chaotic Inspiration}
 	\label{sec:elman-implementation}
 
-	The second method I implemented was based on the Elman network with chaotic inspiration as described in section \ref{sec:coca-net}. Unlike the previous algorithm this implementation was much more similar to the actual model described in the literature. This is because this algorithm is much more suited ``out-the-box'' for this problem, particularly with its built-in use of non-determinism with respect to the input melody. 
-	%TODO: Needs more stuff
+	The second method implemented was based on the Elman network with chaotic inspiration as described in section \ref{sec:coca-net}. Unlike the previous algorithm this implementation was much more similar to the original model described in the literature. This is because the algorithm is more immediately suitable for this problem, particularly with its built-in use of non-determinism with respect to the input melody. 
 	
 	\subsubsection{Network}
 	
-	The network design is a fairly standard Elman network with a recurrent connection from the hidden layer to itself and the output layer to the input layer. The input layer contains nodes representing pitch, duration, and chaotic input. The pitch representation is based on Franklin's circles-of-thirds model \cite{franklin2006recurrent}. This representation is useful as there is a similarity between notes that are at intervals of 3 and 4 semitones which has musical importance; however it increases the probability of off-key notes being generated as a result. It does The duration representation is a binary string with value $d$ equal to the length of the note in fractions of a beat. The specific fraction I used was $\frac{1}{8}$, so that $d = 8$ gives a whole note. This was sufficient to cover all training and test cases, although there would be no issue with increasing this value further. The chaotic input value corresponds to a single pitch within an undefined octave, as explained below.
+	The network design is a fairly standard Elman network with a recurrent connection from the hidden layer to itself and the output layer to the input layer. The input layer contains nodes representing pitch, duration, and chaotic input. The pitch representation is based on Franklin's circles-of-thirds model \cite{franklin2006recurrent}. This representation is useful as there is a similarity between notes that are at intervals of 3 and 4 semitones which has musical importance; however it increases the probability of off-key notes being generated as a result. It does The duration representation is a binary string with value $d$ equal to the length of the note in fractions of a beat. The specific fraction used was $\frac{1}{8}$, so that $d = 8$ gives a whole note. This was sufficient to cover all training and test cases, although there would be no issue with increasing this value further. The chaotic input value corresponds to a single pitch within an undefined octave, as explained below.
 	
 	Finally, an additional input was added to the network's inputs - the position within the song of the current note. This provides explicit structural knowledge of the song to the network creating the piece. In the current version of the network this input takes the form of a bar counter; a binary string representing the number of bars into the song that the current note is being played. This is a fairly major boon, as the music in the training set has a fixed and relatively small length. In the case that the network is designed to work with larger and more complex musical pieces, the representation could be expanded to instead number greater structural features, such as labelling the verse or chorus of the song. While this would be infeasible for many other generative algorithms, the context of use for this algorithm permits (and in fact encourages) that a human user provide such useful input to the algorithm.
 
 	\subsubsection{Chaotic Inspiration}
 	
-	The chaotic music generation algorithm as described in \ref{sec:coca-net} takes as inputs the solutions to a non-linear dynamical system and the description of a scale defined by the user. The dynamical system used in this case is a Lorenz system \cite{lorenz1963deterministic}, a mathematical model used to simulate atmospheric convection. It is a relatively simple system, making it well suited to use as a utility, while still demonstrating the necessary chaotic sensitivity to its inputs (dependent on selection of parameters and initial conditions). I implemented the Lorenz system using SciPy's \texttt{odeint()} function for ordinary differential equation integration.
+	The chaotic music generation algorithm as described in \ref{sec:coca-net} takes as inputs the solutions to a non-linear dynamical system and the description of a scale defined by the user. The dynamical system used in this case is a Lorenz system \cite{lorenz1963deterministic}, a mathematical model used to simulate atmospheric convection. It is a relatively simple system, making it well suited to use as a utility, while still demonstrating the necessary chaotic sensitivity to its inputs (dependent on selection of parameters and initial conditions). The Lorenz system was implemented using SciPy's \texttt{odeint()} function for ordinary differential equation integration.
 	
-	The only output from the Lorenz system that is used in the music generation algorithm are the solutions to the $x$ value of the state vector over time, $x(t)$. This value is then mapped onto a generated vector of normalized frequencies corresponding to the target musical scale for the algorithm. This scale is generated by first calculating the frequency ratios of an equal temperament scale according to the tuning factor $\lambda$ used in the scale across the specified total range of scale in notes $p$, given by $r_i = 2^{\frac{i \cdot \lambda}{6}}, 0 \leq i \leq p$. The vector $g = \mathtt{scalefilter}(r)$ is then calculated, where \texttt{scalefilter()} applies a filter such that only frequency ratios corresponding to a note that is in the scale defined by the user are kept, while all others are removed. The values in $x(t)$ are then normalized to the range $[\min g, \max g]$ by a translation and scale. Finally, these value are approximated to the nearest frequency values in $g$ and mapped to the user-defined scale.
+	The only output from the Lorenz system that is used in the music generation algorithm are the solutions to the $x$ value of the state vector over time, $x(t)$. This value is then mapped onto a generated vector of normalized frequencies corresponding to the target musical scale for the algorithm. This scale is generated by first calculating the frequency ratios of an equal temperament scale according to the tuning factor $\lambda$ used in the scale across the specified total range of scale in notes $p$, given by $r_i = 2^{\frac{i \cdot \lambda}{6}}, 0 \leq\leq p$. The vector $g = \mathtt{scalefilter}(r)$ is then calculated, where \texttt{scalefilter()} applies a filter such that only frequency ratios corresponding to a note that is in the scale defined by the user are kept, while all others are removed. The values in $x(t)$ are then normalized to the range $[\min g, \max g]$ by a translation and scale. Finally, these value are approximated to the nearest frequency values in $g$ and mapped to the user-defined scale.
 	
-	While the output from the Lorenz system is a form of structured randomness, the equations themselves are deterministic, meaning that for a fixed input the outputs will always be the same. I have made use of this during training by generating the initial state for the Lorenz system using a pseudorandom function of the melody being trained. The reason for this is so that a given melody will always be trained with the same inspiration values, although there is still no identifiable relationship between the two. This is useful because it increases the chance that the inspiration inputs are given some kind of ``meaning'' by the network rather than being potentially tuned out as ``noise'', as certain values (in combination with the standard input) will consistently result in the same outputs. This could be considered similar to the plan inputs used in the previous network design, but in this case the relationship between input and song is much more abstract, and the chaotic input changes throughout the song (unlike the plan). During generation, the input to the Lorenz system is generated randomly, to create variation in the output. This input can be changed to generate a different output from the network, effectively introducing some useful randomization. 
+	While the output from the Lorenz system is a form of structured randomness, the equations themselves are deterministic, meaning that for a fixed input the outputs will always be the same. This was made use of during training by generating the initial state for the Lorenz system using a pseudorandom function that mapped the melody being trained to a numerical value. The reason for this is so that a given melody will always be trained with the same inspiration values, although there is still no identifiable relationship between the two. This is useful because it increases the chance that the inspiration inputs are given some kind of ``meaning'' by the network rather than being potentially tuned out as ``noise'', as certain values (in combination with the standard input) will consistently result in the same outputs. This could be considered similar to the plan inputs used in the previous network design, but in this case the relationship between input and song is much more abstract, and the chaotic input changes throughout the song (unlike the plan). During generation, the input to the Lorenz system is generated randomly, to create variation in the output. This input can be changed to generate a different output from the network, effectively introducing some useful randomization. 
 	
 	
 	
@@ -707,77 +706,77 @@
 	\chapter{Critical Evaluation}
 	\label{chap:evaluation}
 	
-	In this chapter, the algorithms described in the previous chapter are assessed on their ability to generally model music as well as their value as an assistant to a human composer. 
+	In this chapter, the algorithms described in the previous chapter are assessed on their ability to generally model music as well as their value in an assisting role to a human composer. 
 	
 	\section{Testing Outline}
 	
-	For each of the tested algorithms described in the section above, a pair of tests were performed. The first set of tests were objective tests designed to estimate the effect on performance of varying the parameters to the algorithm. Essentially the goal of this stage was to determine the optimal performance state for each algorithm, and as such the exact details of the tests were different (to a limited extent) for each algorithm - this was not problematic at all as no cross-comparison was taking place. The second set of tests was a subjective evaluation of the algorithms, designed to test their performance in a compositional context. These tests were performed identically for each algorithm and provided them with a ranking as well as an overall quality assessment. 
+	For each of the algorithms described in the section above, a pair of tests were performed. The first set of tests were objective tests designed to estimate the effect of the algorithm parameters on performance. The goal of this stage was to determine the optimal parameters for each algorithm, and as such the exact details of the tests were different (to a limited extent) for each algorithm - this was not problematic at all as no cross-comparison was taking place. The second set of tests was a subjective evaluation of the algorithms, designed to test their performance in working with a real composer. These tests were performed identically for each algorithm and provided them with an overall quality assessment. 
 	
 	\subsection{Objective Tests}
 	\label{sec:objective-analysis}
 	
-	The objective tests were based on a simple test that has been used many times before in existing literature \cite{todd1989connectionist,franklin2006recurrent,paiement2007generative}: the ability to learn a song and recreate it from memory. Notably for this task the testing set is not separated from the training set; this is by design, as the goal of the model is to learn the features of the songs - it would be completely infeasible for any model to be expected to accurately recreate a song it has never seen before. Naturally this test is well-suited to supervised learning models and poorly suited to others, which is acceptable in this case. This test is an imperfect way to assess algorithmic composition in general; it does not select for many of the positive cases, in which an algorithm produces consistently good but original content, and it also selects for negative cases such as when the algorithm overfits to the training set and only ever recalls exact melodies it has previously seen. It does, however, serve as a good indicator that a model is at least capable of modelling music to a limited extent, which is an acceptable basis for more in-depth testing.
+	The objective tests were based on a simple test that has been used many times before in existing literature \cite{todd1989connectionist,franklin2006recurrent,paiement2007generative}: the ability to learn a song and recreate it from memory. Notably for this task the testing set is not separated from the training set; this is by design, as the goal of the model is to learn the features of the songs - it would be completely infeasible for any model to be expected to accurately recreate a song it has never seen before. Naturally this test is only useful for supervised learning models, which is acceptable in this case. This test is an imperfect way to assess algorithmic composition in general, as it does not select for many of the positive cases in which an algorithm produces consistently good but original content, and it also selects for negative cases such as when the algorithm overfits to the training set and only ever recalls exact melodies it has previously seen. It does, however, serve as a good indicator that a model is at least capable of learning some of the patterns in music to a limited extent, which is an acceptable preliminary testing strategy.
 	
-	Some of the factors that affect the outcome of the test are the number of training iterations used, the size and complexity of the training set, and the parameters of the model. Given that the goal is to fit to the data as closely as possible, a larger number of iterations can always be expected to result in an improvement in the resulting model. It is still a point of interest however to examine the number of iterations needed to achieve an ideal or close-to-ideal result, as this will affect the amount of time required to train the model, which has an important impact on its value in a practical use case. The choice of training data may affect different algorithms in different ways, depending on how well that algorithm performs on the particular characteristics of the music being used. As an example, a model that has trouble fitting to complicated rhythms will likely perform much better on rock n' roll than jazz. 
+	Some of the factors that affect the outcome of the test are the number of training iterations used, the size and complexity of the training set, and the parameters of the model. Given that the goal is to fit to the data as closely as possible, a larger number of iterations can always be expected to result in an improvement in the resulting model. It is still a point of interest however to examine the number of iterations needed to achieve an ideal or close-to-ideal result, as this will affect the amount of time required to train the model, which has an important impact on its value in a practical use case. The choice of training data may affect different algorithms in different ways, depending on how well that algorithm performs on the particular characteristics of the music being used; for example, a model that has trouble fitting to complicated rhythms will likely perform much better on rock n' roll than jazz. 
 	
 	\subsubsection{Testing Protocol}
 	
-	The formal testing protocol for this process is as follows:
+	The procedure for the objective tests is as follows:
 	\begin{enumerate}
-		\item Prepare several test sets of differing sizes and content.
-		\item For each model, generate a set of parameters and training iterations.
-		\item For each combination of test sets, models, parameters, and training iterations:
+		\item For each model, specify a set of parameters and training iterations.
+		\item For each combination of models, parameters, and training iterations:
 		\begin{enumerate}
 			\item Train a model on the test set using the given parameters for the given number of training iterations.
-			\item Have the trained model attempt to rewrite consecutive sections of 1, 2, and 4 bars for each song in the training set.
-			\item Record the distance between the model output and the corresponding original fragment.
+			\item Have the trained model attempt to write a set of substitutions for consecutive sections of 1, 2, and 4 bars, for each position in each song in the training set.
+			\item Record the distances between the model outputs and the corresponding original fragment.
 		\end{enumerate}
-		\item For each model determine the set of parameters and iteration counts with minimum size/complexity that achieve the greatest performance, recording these as ``ideal'' cases.
+		\item For each model determine the ideal set of parameters and iteration counts as those that give the smallest distance in their outputs, preferring simple models with fewer iteration counts.
 	\end{enumerate}
 	
-	As noted in the overview above there are specific variations of this test for each algorithm. These variations are:
+	As noted in the overview above there are specific variations of this test for each algorithm. These variations are explained here:
 	\begin{itemize}
-		\item For the Jordan network, the rhythm and pitch use two separate models such that the pitch model is dependent on the rhythm model but not vice versa; therefore they should be tested separately, and the rhythm model should use its ``ideal'' settings when the pitch model is being tested.
-		\item For the Elman network, during generation the chaotic inspiration should be set to the same value as was used for the corresponding melody during training; this is because the chaotic inspiration is deliberately meant to introduce originality to the output, and so when trying to exactly imitate a piece the inspiration value should also be imitated.
+		\item For the Jordan-based model, the rhythm and pitch use two separate models such that the pitch model is dependent on the rhythm model but not vice versa; therefore they should be tested separately, and the rhythm model should use its ``ideal'' settings when the pitch model is being tested.
+		\item For the Elman-based model, during generation the chaotic inspiration should be set to the same value as was used for the corresponding melody during training; this is because the chaotic inspiration is deliberately meant to introduce originality to the output, and so when trying to exactly imitate a piece the inspiration value should also be imitated.
 	\end{itemize}
 	
 	\subsection{Subjective Tests}
 	\label{sec:subjective-analysis}
 	
-	The subjective analysis of the algorithms was intended to give a more useful evaluation of their overall effectiveness at co-composition. Despite the highly subjective nature of music and creativity in general, a relatively low proportion of existing work in algorithmic composition makes use of any human evaluation beyond cursory musings on the musical nature of the algorithm's outputs. This is most likely due to the difficulty of obtaining useful data from a human subject with regard to artistic quality. The test which generally overcomes these difficulties most effectively, and one of the most popular subjective tests within computational creativity for both cultural and practical reasons, is the Turing test. The general protocol for this test in the context of art is to present a human subject with a pair of artistic works, one created by a human and the other by a computer, and challenge them to determine which was created by the computer. This is generally considered to be an effective measure of computational creativity, as the goal of most such tasks is to be able to effectively imitate the creativity found in humans; therefore, indistinguishability between human and algorithm may be considered a success of sorts.
+	The subjective analysis of the algorithms was intended to give a more useful evaluation of their overall effectiveness at co-composition. Despite the highly subjective nature of music and creativity in general, a relatively low proportion of existing work in algorithmic composition makes use of any human evaluation beyond cursory musings on the musical nature of the algorithm's outputs. This is most likely due to the difficulty in obtaining useful data with regard to artistic quality from a human subject. One test which overcomes these difficulties effectively, and one of the most popular subjective tests within computational creativity for both cultural and practical reasons, is the Turing test. The general protocol for this test in the context of art is to present a human subject with a pair of artistic works, one created by a human and the other by a computer, and challenge them to determine which was created by the computer. This is generally considered to be an effective measure of computational creativity, as the goal of most such tasks is to be able to effectively imitate the creativity found in humans; therefore, true indistinguishability between human and algorithm may be considered a total success.
 	
-	In the case of this particular research topic however, the goal is not to determine an algorithm capable of human-like creativity, but one that can produce material to assist human creativity. The difference in this case is subtle but important. As an example, consider an algorithm that produced excellent musical material with the exception of adding a totally random note once every bar: This would be trivially distinguishable from a human's work, as the random notes would often appear to completely clash with the rest of the melody in a way that few humans would consider acceptable. It would however be perfectly useful as material for a composer, as the presence of the occasional random notes would not diminish the musical quality of the remaining content. Therefore the best way to approach the subjective testing is not from a listener's point of view, but a composer's.
+	In the case of this particular research topic however, the goal is not to develop an algorithm capable of human-like creativity, but one that can produce material to assist human creativity. The difference in this case is subtle but important. As an example, consider an algorithm that produced excellent musical material with the exception of adding a totally random note once every bar: This would be trivially distinguishable from a human's work, as the random notes would often appear to completely clash with the rest of the melody in a way that few humans would consider acceptable. It would however be perfectly useful as material for a composer, as the presence of the occasional random notes would not diminish the musical quality of the remaining content. Therefore the best way to approach the subjective testing is not from a listener's point of view, but a composer's.
 	
-	The outline of this test is quite straightforward: a composer is asked to compose 6 bars of an original 8 bar piece (though not necessarily the first 6 bars), in a style reasonably consistent with the music used to train the model that is being tested. Following this, the model algorithmically generates a set of several possible completions for melody. The composer selects one of these outputs to fill the empty bars with, and then makes modifications to it until they are satisfied with the resulting piece. This process is repeated for each algorithm being tested, as well as an additional algorithm used as a control that generates random monophonic melodies (within appropriate constraints).
+	The outline of this test is quite straightforward: a composer is asked to compose 6 bars of an original 8 bar piece (though not always the first 6 bars), in a style reasonably consistent with the music used to train the model that is being tested. Following this, the model algorithmically generates a set of several possible completions for the melody. The composer selects one of these outputs to fill the empty bars with, and then makes modifications to it until they are satisfied with the resulting piece. This process is repeated for each algorithm being tested, as well as an additional algorithm used as a control that generates random monophonic melodies (within appropriate constraints).
 	
-	The metric tested for is an edit distance measure between the original output of the algorithm and the final version edited by the composer. The motivation for this metric is that edit distance is an approximate indicator of the amount of work needed to transform one piece into another. It is clearly not a perfect representation of the work taking place as the mental process of composition is poorly understood and far more complicated than can be captured in a simple objective test. In the absence of such a test, it is safer and more effective to use a direct measure of similarity and perform an additional level of analysis subjectively. There have been a few attempts at algorithmically determining musical similarity, some even being used themselves for algorithmic composition \cite{burton1998hybrid}; however, these methods have limited success and are generally unsuitable for this use case due to requiring training or more input data.
-	
-	%TODO: If an interactive element during generation is ultimately involved, include it as part of the test
+	The metric tested for is an edit distance measure between the original output of the algorithm and the final version edited by the composer. The motivation for this metric is that edit distance is an approximate indicator of the amount of work needed to transform one piece into another. It is clearly not a perfect representation of the work taking place, which is to be expected since the mental process of composition is poorly understood and far more complicated than can be captured in a simple objective measure. In the absence of such a measure, it is safer and more effective to use a direct measure of similarity and perform additional subjective analysis to complement these results. It should be noted that there have been a few attempts at algorithmically determining musical similarity, some even being used themselves for algorithmic composition \cite{burton1998hybrid}; however, these methods have limited success and are generally unsuitable for this use case due to requiring training and/or more input data.
 	
 	%TODO: Use orthogonal rhythm-pitch measures; stick to nice pure distance measures; include some in-depth analysis of properties such as mean not length
 	
 	\subsubsection{Testing Protocol}
 	
-	The formal testing protocol for this process is as follows:
+	The procedure for the subjective tests is as follows, repeated for each composer:
 	\begin{enumerate}
-		\item Select a random algorithm from the set of algorithms being tested (including the random generator) that has not been tested so far.
-		\item Instruct the subject to compose a 6 bars of an 8 bar melody, leaving empty the 5th and 6th bars
-		\item Use the selected algorithm to generate 4 different fragments that each complete the composed melody.
-		\item Have the user select one of these fragments to merge with their melody.
-		\item Allow the user to make adjustments to the fragment until they are satisfied with resulting total melody.
-		\item Record the edit distance between the original fragment and the modified version.
+		\item Select a random algorithm from the set of algorithms being tested (including the random generator) that has not yet been tested.
+		\item For each pair of bars 3 \& 4, 5 \& 6, and 7 \& 8:
+		\begin{enumerate}
+			\item Instruct the subject to compose 6 bars of an 8 bar melody, leaving empty the current pair of bars.
+			\item Use the selected algorithm to generate 4 different fragments that each complete the composed melody.
+			\item Have the user select one of these fragments to merge with their melody.
+			\item Allow the user to make adjustments to the fragment until they are satisfied with resulting total melody.
+			\item Record the edit distance between the original fragment and the modified version.
+		\end{enumerate}
 		\item Repeat each of these steps until all algorithms have been tested.
 	\end{enumerate}
 	
-	The random generation algorithm chosen is the chaotic inspiration algorithm used in \ref{sec:elman-implementation}. This is a convenient way to generate melodies that fit within the specified key without featuring any kind of intelligence in the composition process.
+	The random generation algorithm chosen is the chaotic inspiration algorithm used in \ref{sec:elman-implementation}. This is a convenient way to generate melodies that fit within the specified key without featuring any kind of intelligence in the composition process. It is worth noting that each combination of algorithm and bars is only tested once for each composer. While this is not ideal testing protocol, composing is a taxing task (particularly when working with many constraints). Without repeated tests each composer would be writing 9 different 8 bar melodies - to double this by adding a single repeat would cause an undesired level of fatigue and negatively impact the results. 
 	
 	\section{Objective Test Parameters}
 	
 	\subsection{Distance Model with HMM}
 	
-	The combined distance model and hidden Markov model, described in \ref{sec:distance-model} and \ref{sec:jordan-implementation}, is a model that represents only rhythm. This contrasts with most of the other models, which represent both rhythm and pitch. As a result the objective measure used is slightly different from the other test cases. Conveniently the model itself already provides a useful measure for similarity between two rhythms in the form of the Hamming distance. The distance value given by this measure is the number of timesteps at which the rhythms differ. Although this measure is imperfect in some ways (see \ref{sec:jordan-implementation}) it suffices for producing an accurate ranking of results.
+	The combined distance model and hidden Markov model, described in \ref{sec:distance-model} and \ref{sec:jordan-implementation}, is a model that represents only rhythm. This contrasts with most of the other models, which represent both rhythm and pitch; as a result the objective measure used is slightly different from the other test cases. Conveniently the model itself already provides a useful measure for similarity between two rhythms in the form of the Hamming distance. The distance value given by this measure is the number of timesteps at which the rhythms differ. Although this measure is imperfect in some ways (see \ref{sec:jordan-implementation}) it suffices for producing an accurate ranking of results.
 	
-	As this rhythm model is in itself a composite model in which one component acts as a generator and the other acts to refine the result, it can be divided into two separate testing stages in the same manner as the Jordan model. There is one reason why this might not be preferred: During the refinement stage of the rhythm model, both the HMM and the distance model play an important role; while a more generally accurate HMM would appear to produce strictly better results it is not a guarantee when paired with the distance model. However it is a reasonably safe assumption that cases in which generally high accuracy does not translate to high paired accuracy are both rare and mostly insignificant. In the absence of any concrete evidence or reasoning to suggest the significance of such a case, these tests assume independence between component parameter tunings.
+	As this rhythm model is in itself a composite model in which one component acts as a generator and the other acts to refine the result, it can be divided into two separate testing stages. There is one reason why this might not be preferred: During the refinement stage of the rhythm model, both the HMM and the distance model play an important role; while a more generally accurate HMM would appear to produce strictly better results it is not a guarantee when paired with the distance model. However it is a reasonably safe assumption that cases in which generally high accuracy does not translate to high paired accuracy are both rare and mostly insignificant, as the combination simply searches for rhythms that are optimal under both models. In the absence of any concrete evidence or reasoning to suggest the significance of such a case, these tests assume independence between component parameter tunings.
 	
 	\subsubsection{Parameters Tested}
 	
@@ -795,7 +794,7 @@
 		\item $\lambda$ -- The scoring factor of the distance model
 	\end{itemize}
 	
-	Distinctly absent from the training parameters is the convergence tolerance for the EM algorithms in both cases, $c_H$ and $c_D$, which is used to halt the algorithm when the rate of improvement per iteration falls below a certain threshold, i.e. the algorithm has converged. The reason for their absence is that the tolerance value for EM convergence has strict inverse proportionality to the success of the model, and so will be fixed at a sufficiently low value $c_H = c_D = 10^{-7}$ for all tests to ensure a fair comparison. Furthermore, not all iteration counts need be tested for a given model; if the EM algorithm consistently converges within a certain number of iterations then testing that model with any greater number of iterations is purely redundant. The number of iterations required for the distance model to converge is also sufficiently small that it can always be allowed to converge. 
+	Distinctly absent from the training parameters are the convergence tolerances for the EM algorithms in both cases, $c_H$ and $c_D$, which are used to halt the algorithm when the rate of improvement per iteration falls below a certain threshold, i.e. the algorithm has converged. The reason for their absence is that the tolerance value for EM convergence has strict inverse proportionality to the success of the model, and so will be fixed at a sufficiently low value $c_H = c_D = 10^{-7}$ for all tests to ensure a fair comparison. Furthermore, not all iteration counts need be tested for a given model; if the EM algorithm consistently converges within a certain number of iterations then testing that model with any greater number of iterations is purely redundant. The number of iterations required for the distance model to converge is also sufficiently small that it can always be allowed to converge. 
 	
 	\begin{table}[h]
 		\begin{center}
@@ -814,11 +813,9 @@
 		\label{tab:jordan-rhythm-parameters}
 	\end{table}
 	
-	%TODO: Table this stuff, for all sections
-	
 	\subsection{Jordan-Based Model}
 	
-	Following the previous tests, the full Jordan model was tested for its ability to recreate full melodies. The rhythm-based parameters were set as \textbf{TODO} in accordance with the results above. As this model uses both pitch and rhythm it is necessary to use a different distance measure to the rhythm distance used previously. However, the timestep representation of melody used by the Jordan network does allow the Hamming distance to be used once more; two timesteps can be considered different if either the pitch or the rhythm differs between them. This is a fairly strict measure as the model will receive a minimal score for a perfect rhythm if the pitches are all wrong or vice versa, but pitch and rhythm are such intertwined concepts in music that they should not be scored independently.
+	Following the previous tests, the full Jordan-based model was tested for its ability to recreate full melodies. As this model uses both pitch and rhythm it is necessary to use a distance measure incorporating both pitch and rhythm, as opposed to the rhythm distance used previously. However, the timestep representation of melody used by the Jordan network does allow the Hamming distance to be used once more; two timesteps can thus be considered different if either the pitch or the rhythm differs between them. This is a fairly strict measure as the model will receive a minimal score for a perfect rhythm if the pitches are all wrong or vice versa, but pitch and rhythm are sufficiently intertwined concepts that they should not be scored independently.
 	
 	\subsubsection{Parameters Tested}
 	
@@ -831,7 +828,7 @@
 		\item $e$ -- Number of epochs of training for the ANN
 	\end{itemize}
 	
-	The parameters involved with the HMM are not included in this section, as they have already been fixed. An important feature of the values being tested is that they have a close relation in performance impact. Networks with a larger number of hidden neurons typically require many more epochs to learn any valuable information, and additionally once the network reaches convergence additional epochs contribute nothing further. As a result there are some combinations of $h$ and $e$ which do not give results of any value; therefore instead of testing every combination of $h$ and $e$, a range of $e$ values will be tested for each value of $h$ to determine its worst and best performance, using the results from previous $h$ values to determine a viable starting point. 
+	The parameters involved with the HMM are not included in this section, as they are determined in a different test (described in the section above). An important feature of the values being tested is that they have a close but hard to intuit relation in their impact on performance. Networks with a larger number of hidden neurons may require many more epochs to reach convergence, but may also not require as many epochs to learn certain patterns as a simpler network would; this is particularly true with complex pattern analysis as in this case. Because of this, every combination of $h$ and $e$ may produce a viable result, even in cases where it might otherwise seem safe to assume the network would perform poorly (such as running the minimum number of iterations for the largest network).
 	
 	\begin{table}[h]
 		\begin{center}
@@ -848,7 +845,7 @@
 		\label{tab:jordan-net-parameters}
 	\end{table}
 	
-	The values tested for the number of hidden neurons were chosen to cover the likely range of useful values for a dataset of this size (estimated based on the literature \cite{todd1989connectionist}). The range of values that may be tested for the number of epochs is a liberal estimate of the upper and lower bounds that may be required by the network. As previously mentioned, testing for a particular $h$ value will cease if increasing the number of epochs has no apparent effect on results, so there is no issue with assuming a higher upper bound; it is important to set an upper bound of some kind however, as this work is intended to have practical implications and hence must obey time constraints that are at least semi-realistic.
+	The values tested for the number of hidden neurons were chosen to cover the likely range of useful values for a dataset of this size (estimated based on the literature \cite{todd1989connectionist}). The range of values that may be tested for the number of epochs is a liberal estimate of the upper and lower bounds that may be required by the network. It is possible that a greater number of iterations would improve performance further, but it is important to set an upper bound in this case, as this work is intended to have practical implications and hence must obey time constraints that are at least semi-realistic.
 	
 	\subsection{Elman-Based Model}
 	
@@ -865,7 +862,7 @@
 		\item $e$ -- Number of epochs of training for the ANN
 	\end{itemize}
 	
-	These parameters are identical to those used for the Jordan network above, as they are both fundamentally similar; the main differences between the two are the representation, internal connectivity, and use of chaotic inspiration, none of which are directly influenced by parameters. The values chosen for the parameters are the same as those used for the Jordan network for a similar reason; it is unlikely that either network will require many more neurons or training epochs than the other. These differences do of course still have enough of an impact that the actual results from the Jordan model tests cannot be used in any way for these tests.
+	These parameters are identical to those used for the Jordan network above, as they are both fundamentally similar; the main differences between the two are the representation, internal connectivity, and use of chaotic inspiration, none of which are directly influenced by parameters. The values chosen for the parameters are the same as those used for the Jordan network for similar reasons; it is unlikely that either network will require many more neurons or training epochs than the other. 
 	
 	\begin{table}[h]
 		\begin{center}
@@ -884,10 +881,9 @@
 	
 	\section{Objective Results}
 
-	In this section the results for the first stage of tests, in which the goal is to imitate an existing piece, are given along with some analysis. It is important to note that these tests are primarily useful for determining optimal parameters and certain objective qualities such as relative run-time, rather than giving an indicator of overall performance with regard to the main objective (which is covered by the second stage of tests). Because of this each algorithm being tested will be reviewed independently with no comparative analysis taking place.
+	In this section the results for the first stage of tests, in which the goal is to imitate an existing piece, are given along with some analysis. It is important to keep in mind that these tests are primarily useful for determining optimal parameters rather than giving an indicator of overall performance in co-composition (which is covered by the second stage of tests). Because of this each algorithm being tested will be reviewed independently with no comparative analysis taking place.
 	
-	%TODO Name the nursery rhymes
-	The testing data used for these tests was a set of $6$ nursery rhymes, all of which are in \setmeter{4}{4} meter, 8 bars long, and in the key of C major. This testing size is much larger than the test set used for training/testing the neural networks that are derived from in this work. The reason for this is that a larger dataset is more appropriate for the task at hand; the networks developed here should be generating segments of good musical quality rather than learning melodies with high precision. As a result they are not expected to have high accuracy, but should still produce an output somewhat resembling the original melody (and so should vastly outperform a random model). In order to account for the stochastic nature of the models in use, each set of bars was generated $30$ times and the average accuracy taken. Finally, the task of replacing bars in the original song was repeated for each set of consecutive viable bars within the song (with the exception of the first bar, as there is no prior material for the algorithm to build on).
+	The testing data used for these tests was a set of $6$ nursery rhymes, all of which were in \setmeter{4}{4} meter, 8 bars long, and in the key of C major. This testing size is much larger than the test sets that were used for training/testing the neural networks that are derived from in this work. The reason for this is that a larger dataset is more appropriate for the task at hand; the networks developed here should be generating segments of good musical quality rather than learning melodies with high precision. As a result they are not expected to have high accuracy, but should still produce an output somewhat resembling the original melody (and so should vastly outperform a random model). In order to account for the stochastic nature of the models in use, each test was run $30$ times and the average accuracy of these tests was taken. Finally, the task of replacing bars in the original song was repeated for each set of consecutive viable bars within the song with the exception of the first bar (as there is no prior material for the algorithm to build on).
 	
 	\subsection{Distance Model with HMM}
 	
@@ -895,8 +891,7 @@
 	
 	\subsubsection{Results for HMM}
 	
-	The HMM was tested with increasing numbers of iterations $i_H$ for each number of hidden states $s$ up until the model was able to consistently reach convergence. The number of EM iterations needed to reach convergence for each value of $s$ proved to feature a very high degree of variance. As a reminder, the HMM training process for this model involves fitting many different HMMs to the dataset and then selecting the best-performing, as a way to avoid converging early to a poor overall fit (see \ref{sec:jordan-implementation}); due to the inherent randomness of the EM algorithm and the size/complexity of the data this resulted in a very noisy spread. This would need to be resolved with more computation time, as the number of measurements needed to obtain a good view of the relationship between hidden states and training iterations was prohibitively large to obtain during this project. 
-	%TODO: Mention a way this could be fixed that doesn't imply this was all left to the last minute
+	The HMM was tested with increasing numbers of iterations $i_H$ for each number of hidden states $s$ up until the model was able to consistently reach convergence. The number of EM iterations needed to reach convergence for each value of $s$ proved to feature a very high degree of variance. As a reminder, the HMM training process for this model involves fitting many different HMMs to the dataset and then selecting the best-performing, as a way to avoid using an HMM that converged early to a poor overall fit (see \ref{sec:jordan-implementation}). Due to the inherent randomness of the EM algorithm and the size/complexity of the data, this resulted in a fairly noisy spread of iterations-until-convergence, with no statistically significant relation. To resolve this would require more computation time than was allotted for testing, as the number of measurements needed to obtain a good view of the relationship between hidden states and training iterations was prohibitively large to obtain during this project.
 	
 	The accuracies of the converged HMMs for each of the completion tasks are given in table \ref{tab:hmm-results}. 
 	
@@ -967,18 +962,18 @@
 	
 	\begin{table}[htp]
 		\begin{center}
-			\begin{tabular}{ccccccccc}
+			\begin{tabular}{cccccccc}
 				\toprule
-				Size of& \multicolumn{8}{c}{Epochs}\\
-				\cline{2-9}
-				Hidden Layer& $5000$ & $8000$ & $13000$ & $21000$ & $34000$ & $55000$ & $89000$ & $144000$\\
+				Size of& \multicolumn{7}{c}{Epochs}\\
+				\cline{2-8}
+				Hidden Layer& $3000$ & $5000$ & $8000$ & $13000$ & $21000$ & $34000$ & $55000$\\
 				\hline
-				$12$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$24$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$36$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$48$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$60$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$72$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$12$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$24$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$36$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$48$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$60$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$72$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
 				\bottomrule
 			\end{tabular}
 		\end{center}
@@ -996,18 +991,18 @@
 	
 	\begin{table}[htp]
 		\begin{center}
-			\begin{tabular}{ccccccccc}
+			\begin{tabular}{cccccccc}
 				\toprule
-				Size of& \multicolumn{8}{c}{Epochs}\\
-				\cline{2-9}
-				Hidden Layer& $5000$ & $8000$ & $13000$ & $21000$ & $34000$ & $55000$ & $89000$ & $144000$\\
+				Size of& \multicolumn{7}{c}{Epochs}\\
+				\cline{2-8}
+				Hidden Layer& $3000$ & $5000$ & $8000$ & $13000$ & $21000$ & $34000$ & $55000$\\
 				\hline
-				$12$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$24$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$36$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$48$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$60$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$72$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$12$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$24$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$36$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$48$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$60$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$72$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
 				\bottomrule
 			\end{tabular}
 		\end{center}
@@ -1017,18 +1012,18 @@
 	
 	\begin{table}[htp]
 		\begin{center}
-			\begin{tabular}{ccccccccc}
+			\begin{tabular}{cccccccc}
 				\toprule
-				Size of& \multicolumn{8}{c}{Epochs}\\
-				\cline{2-9}
-				Hidden Layer& $5000$ & $8000$ & $13000$ & $21000$ & $34000$ & $55000$ & $89000$ & $144000$\\
+				Size of& \multicolumn{7}{c}{Epochs}\\
+				\cline{2-8}
+				Hidden Layer& $3000$ & $5000$ & $8000$ & $13000$ & $21000$ & $34000$ & $55000$\\
 				\hline
-				$12$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$24$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$36$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$48$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$60$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$72$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$12$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$24$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$36$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$48$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$60$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$72$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
 				\bottomrule
 			\end{tabular}
 		\end{center}
@@ -1038,18 +1033,18 @@
 	
 	\begin{table}[htp]
 		\begin{center}
-			\begin{tabular}{ccccccccc}
+			\begin{tabular}{cccccccc}
 				\toprule
-				Size of& \multicolumn{8}{c}{Epochs}\\
-				\cline{2-9}
-				Hidden Layer& $5000$ & $8000$ & $13000$ & $21000$ & $34000$ & $55000$ & $89000$ & $144000$\\
+				Size of& \multicolumn{7}{c}{Epochs}\\
+				\cline{2-8}
+				Hidden Layer& $3000$ & $5000$ & $8000$ & $13000$ & $21000$ & $34000$ & $55000$\\
 				\hline
-				$12$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$24$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$36$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$48$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$60$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$72$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$12$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$24$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$36$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$48$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$60$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$72$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
 				\bottomrule
 			\end{tabular}
 		\end{center}
@@ -1075,16 +1070,40 @@
 	
 	\section{Subjective Results}
 	
-	In this section the results are given for the second stage of tests. These tests are reliant on a user feedback from a composer, and so the resulting testing process and analysis is slightly more complicated than in the previous batch of tests. In particular, the edit distance measure used to compare the original and modified melody fragments is an imperfect approximation of the actual effort required to derive one from the other. Because of this there will be some additional degree of subjective analysis focused on the similarity between the two fragments, in order to identify and explain any subtleties or notable features that the distance measure misses. 
+	In this section the results are given for the second stage of tests. These tests are reliant on a user feedback from a composer, and so the resulting testing process and analysis is slightly more complicated than in the previous batch of tests. In particular, the edit distance measure used to compare the original and modified melody fragments is an imperfect approximation of the actual effort required to derive one from the other. Because of this there will be some additional degree of subjective analysis focused on the similarity between the two fragments, in order to identify and explain any subtleties or notable features that are not well represented by the edit distance.
+	
+	Both of the models being tested (and the random model) were presented to 3 different skilled composers. In order to prevent any possibility of bias, each composer was not informed which algorithm was being tested while they ran through the tests. The tests occurred in a random order each time to try and reduce bias resulting from the composers warming up/wearing out. For each model the results are given averaged over each composer and also for each individual composer; the reason for this is that due to personal differences each composer may be more or less likely to make changes to the algorithm's output, and so it may be useful to compare different composers during analysis.
+	
+	\begin{table}[htp]
+		\begin{center}
+			\begin{tabular}{ccccccccccccc}
+				\toprule
+				& \multicolumn{3}{c}{Composer 1}& \multicolumn{3}{c}{Composer 2}& \multicolumn{3}{c}{Composer 3}& \multicolumn{3}{c}{Average}\\
+				%\cline{2-14}
+				Algorithm& 3 \& 4 & 5 \& 6 & 7 \& 8 & 3 \& 4 & 5 \& 6 & 7 \& 8 & 3 \& 4 & 5 \& 6 & 7 \& 8 & 3 \& 4 & 5 \& 6 & 7 \& 8 \\
+				\hline
+				Jordan & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				Elman & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				Random & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				\bottomrule
+			\end{tabular}
+		\end{center}
+		\caption{Model output distances from ideal output based on subjective impression}
+		\label{tab:subjective-results}
+	\end{table}
 	
 	\subsection{Jordan Model}
 	
-	The parameters used for the Jordan model were $s = 5$, $c = 5$, $\lambda = 5$, $h = 5$, and $e = 5$. 
-	
+	The parameters used for the Jordan model were $s = 5$, $c = 5$, $\lambda = 5$, $h = 5$, and $e = 5$, based on the results obtained in \ref{sec:objective-jordan}. 
 	
 	
 	\subsection{Elman Model}
 	
+	
+	\subsection{Random Model}
+
+	The random model is simply the chaotic generation algorithm described in \cite{coca2010characterizing} and used in the Elman-based model. Although more or less random, this is an interesting point of comparison with the other models, as such chaotic algorithms (or similar functions) are actually currently used by some composers to generate material for writing music. In this sense any improvement over this model would constitute some useful progress, as to do so would be to improve on an existing composition tool (albeit a fairly uncommon and simple one).
+
 	% -----------------------------------------------------------------------------
 	
 	\chapter{Conclusion}
