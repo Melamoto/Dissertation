@@ -921,7 +921,7 @@
 	
 	\subsubsection{Results for Full Distance Model}
 	
-	The distance model was tested with different numbers of mixture model subpopulations $c$ and scoring factors $\lambda$. The parameters used for the HMM were $(s = X, i_H = Y)$, as these proved to be feasible settings for potential use cases. The accuracy of the full rhythm model in rewriting rhythm is given in table \ref{tab:rhythm-model-results}. The accuracy for the model is fairly high; this can be expected due to the simplicity of rhythm compared to pitch, but even accounting for this the performance is high. It is however consistently imperfect. The reason for this becomes clear when shown actual examples of the model's work (figure \ref{fig:rhythm-model-example}): the model has a high propensity to write crotchets. This can be attributed to the HMM's influence primarily, as well as the fairly low impact of the distance model on a dataset of this size. 
+	The distance model was tested with different numbers of mixture model subpopulations $c$ and scoring factors $\lambda$. The parameters used for the HMM were $s = 48$, $i_H = 3000$, as these were determined to be good . The accuracy of the full rhythm model in rewriting rhythm is given in table \ref{tab:rhythm-model-results}. The accuracy for the model is fairly high; this can be expected due to the simplicity of rhythm compared to pitch, but even accounting for this the performance is high. It is however consistently imperfect. The reason for this becomes clear when shown actual examples of the model's work (figure \ref{fig:rhythm-model-example}): the model has a high propensity to write crotchets. This can be attributed to the distance model's influence primarily.
 	
 	\begin{table}[htp]
 		\begin{center}
@@ -953,7 +953,6 @@
 		\label{tab:rhythm-model-results}
 	\end{table}
 	
-	From these results it can be seen that for higher values of whatever \textbf{TODO ANALYSIS}
 	
 	\subsection{Jordan Model}
 	\label{sec:objective-jordan}
@@ -1080,7 +1079,7 @@
 				\toprule
 				& \multicolumn{3}{c}{Composer 1}& \multicolumn{3}{c}{Composer 2}& \multicolumn{3}{c}{Composer 3}& \multicolumn{3}{c}{Average}\\
 				%\cline{2-14}
-				Algorithm& 3 \& 4 & 5 \& 6 & 7 \& 8 & 3 \& 4 & 5 \& 6 & 7 \& 8 & 3 \& 4 & 5 \& 6 & 7 \& 8 & 3 \& 4 & 5 \& 6 & 7 \& 8 \\
+				Algorithm& 3\&4 & 5\&6 & 7\&8 & 3\&4 & 5\&6 & 7\&8 & 3\&4 & 5\&6 & 7\&8 & 3\&4 & 5\&6 & 7\&8 \\
 				\hline
 				Jordan & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
 				Elman & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
