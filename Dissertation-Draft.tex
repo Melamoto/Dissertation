@@ -39,8 +39,6 @@
 	\tableofcontents
 	\listoffigures
 	\listoftables
-	\listofalgorithms
-	\lstlistoflistings	
 	
 	% -----------------------------------------------------------------------------
 	
@@ -159,10 +157,8 @@
 	\begin{enumerate}
 		\item Survey literature relating to algorithmic melody composition to determine a set of viable methods for expanding existing musical scores
 		\item Adapt one or more of these algorithms to write partial melodic sequences that build on and provide variations to an existing melody
-		\item Implement an application using this algorithm that allows operation by a non-technical user in a timespan appropriate for practical use (a reasonable estimation would be 1 minute per bar)
-		\item Assess the effectiveness of the algorithm(s) in the context of completing a melody through a set of objective tests
-		\item Determine, for each algorithm being tested, a strategy that enables user interaction with the melodic generation process in some guiding capacity
-		\item Assess the effectiveness of the extended algorithm(s) in the same manner as the original and determine the improvements offered by increased levels of human-computer interaction
+		\item Implement an application using this algorithm that allows operation by a non-technical user in a timespan and manner appropriate for practical use
+		\item Assess the effectiveness of the algorithm(s) in the context of completing a melody through a set of tests that accurately cover their ability to co-compose
 	\end{enumerate}
 	
 	% -----------------------------------------------------------------------------
@@ -627,6 +623,8 @@
 	
 	The parameters used to train the network were a learning rate of $0.05$, a momentum of $0.7$. The reason for the low learning rate is because the problem domain is very large and nuanced, meaning that a high learning rate could easily lead to divergence of the network weights during learning. A high momentum on the other hand helps the network quickly approach a vague approximation of the correct weights. Additionally, a range of different hidden layer sizes and training epochs were experimented with (see \ref{sec:objective-jordan}), as these parameters have a positive relationship with the ability of the network to learn the dataset but may also lead to overfitting - resulting in simply reciting previously seen melodies - if set too high.
 	
+	Finally in order to satisfy the non-determinism requirement, the output of the network was changed to be stochastic. This was achieved by transforming the network's pitch outputs such that they are all positive and sum to 1. Then a roulette wheel selection was made, so that each pitch's probability of selection was equal to its transformed output value. This meant that any pitch could follow from any other pitch, but the vast majority of the time only the pitches that were assigned a high likelihood by the network would be played. 
+	
 	\subsubsection{Distance Model}
 	
 	The model for distances was slightly more complicated to implement, as it is itself a composite system: it combines a hidden Markov model with a unique hamming-distance-based model for rhythms. The HMM was implemented using hmmlearn, an open source python library build on SciPy for creating and using HMMs. The distance model was implemented primarily without library support due to its largely novel nature. 
@@ -651,7 +649,7 @@
 	
 	The combination of the HMM with the distance model first uses the HMM to generate a bar of rhythm, and then uses the Greedy Max Cut algorithm \cite{rohde2002methods} to optimize that bar for a maximum combined score from the HMM and distance model. Specifically the aim is to find an approximation to:
 	$$ \max_{x_1,\dots,x_l} p_{HMM}(\{x_1,\dots,x_l\} | \{y_1,\dots,y_m\}) + \lambda \log p_{DIST}(\{y_1,\dots,y_m,x_1,\dots,x_l\}) \text{ ,} $$
-	where $\lambda$ is a constant value used to weight the relative importance of the distance measure against the HMM. Empirically it was determined that medium values of $\lambda$ (ultimately $\lambda = 1.0$ was used) yielded better results, as otherwise the one model tended to overpower the other.
+	where $\lambda$ is a constant value used to weight the relative importance of the distance measure against the HMM. Empirically it was determined that medium-high values of $\lambda$ (ultimately $\lambda = 2.0$ was used) yielded better results, as otherwise the one model tended to overpower the other.
 	
 	\subsubsection{Representation}
 	
@@ -728,7 +726,7 @@
 		\item For each combination of models, parameters, and training iterations:
 		\begin{enumerate}
 			\item Train a model on the test set using the given parameters for the given number of training iterations.
-			\item Have the trained model attempt to write a set of substitutions for consecutive sections of 1, 2, and 4 bars, for each position in each song in the training set.
+			\item Have the trained model attempt to write a substitution for each bar in each song in the training set.
 			\item Record the distances between the model outputs and the corresponding original fragment.
 		\end{enumerate}
 		\item For each model determine the ideal set of parameters and iteration counts as those that give the smallest distance in their outputs, preferring simple models with fewer iteration counts.
@@ -751,8 +749,6 @@
 	
 	The metric tested for is an edit distance measure between the original output of the algorithm and the final version edited by the composer. The motivation for this metric is that edit distance is an approximate indicator of the amount of work needed to transform one piece into another. It is clearly not a perfect representation of the work taking place, which is to be expected since the mental process of composition is poorly understood and far more complicated than can be captured in a simple objective measure. In the absence of such a measure, it is safer and more effective to use a direct measure of similarity and perform additional subjective analysis to complement these results. It should be noted that there have been a few attempts at algorithmically determining musical similarity, some even being used themselves for algorithmic composition \cite{burton1998hybrid}; however, these methods have limited success and are generally unsuitable for this use case due to requiring training and/or more input data.
 	
-	%TODO: Use orthogonal rhythm-pitch measures; stick to nice pure distance measures; include some in-depth analysis of properties such as mean not length
-	
 	\subsubsection{Testing Protocol}
 	
 	The procedure for the subjective tests is as follows, repeated for each composer:
@@ -770,6 +766,17 @@
 	\end{enumerate}
 	
 	The random generation algorithm chosen is the chaotic inspiration algorithm used in \ref{sec:elman-implementation}. This is a convenient way to generate melodies that fit within the specified key without featuring any kind of intelligence in the composition process. It is worth noting that each combination of algorithm and bars is only tested once for each composer. While this is not ideal testing protocol, composing is a taxing task (particularly when working with many constraints). Without repeated tests each composer would be writing 9 different 8 bar melodies - to double this by adding a single repeat would cause an undesired level of fatigue and negatively impact the results. 
+	
+	The edit distance measure used in this case is based on an ordinary string edit distance, in which the distance is measured by the number of single-character \textit{deletions}, \textit{additions}, and \textit{substitutions} necessary to transform one string to another. In the case of music a slightly more nuanced approach is recommended however, due to the fact that each element of the melody (i.e. each note and rest) is multidimensional. The best parallel to the string edit distance in this case is assigning a distance of $1$ to each of the per-note edit operations:
+	\begin{description}
+		\item[Transpose] Change note pitch
+		\item[Resize] Change note duration
+		\item[Add] Add a new note in the place of a rest
+		\item[Delete] Remove note, replacing with a rest
+		\item[Split] Split note into two notes with the same pitch and combined duration as the original
+		\item[Merge] Merge two notes with the same pitch into a new note with the same total duration
+	\end{description}
+	This gives a good measure of how many adjustments need to be made to transform one monophonic melody into another. This can also be used for polyphonic melodies with the addition of an \textit{add note} operation, but in this case it is not relevant.
 	
 	\section{Objective Test Parameters}
 	
@@ -795,7 +802,7 @@
 		\item $\lambda$ -- The scoring factor of the distance model
 	\end{itemize}
 	
-	Distinctly absent from the training parameters are the convergence tolerances for the EM algorithms in both cases, $c_H$ and $c_D$, which are used to halt the algorithm when the rate of improvement per iteration falls below a certain threshold, i.e. the algorithm has converged. The reason for their absence is that the tolerance value for EM convergence has strict inverse proportionality to the success of the model, and so will be fixed at a sufficiently low value $c_H = c_D = 10^{-7}$ for all tests to ensure a fair comparison. Furthermore, not all iteration counts need be tested for a given model; if the EM algorithm consistently converges within a certain number of iterations then testing that model with any greater number of iterations is purely redundant. The number of iterations required for the distance model to converge is also sufficiently small that it can always be allowed to converge. 
+	Distinctly absent from the training parameters are the convergence tolerances for the EM algorithms in both cases, $c_H$ and $c_D$, which are used to halt the algorithm when the rate of improvement per iteration falls below a certain threshold, i.e. the algorithm has converged. The reason for their absence is that the tolerance value for EM convergence has strict inverse proportionality to the success of the model, and so will be fixed at a sufficiently low value $c_H = c_D = 10^{-7}$ for all tests to ensure a fair comparison. Furthermore, not all iteration counts need be tested for a given model; if the EM algorithm consistently converges within a certain number of iterations then testing that model with any greater number of iterations is purely redundant. The number of iterations required for the distance model to converge is also sufficiently small that it can always be allowed to converge. The number of clusters was not varied for this work largely due to the size of the training set; this parameter should be increased as the size and variety of the training set increases. 
 	
 	\begin{table}[h]
 		\begin{center}
@@ -804,7 +811,7 @@
 				Parameter & Values Tested\\
 				\hline
 				$s$ & 8, 16, 24, 32, 40, 48, 56, 64, 72\\
-				$c$ & 3, 5, 8\\
+				$c$ & 1, 2\\
 				$\lambda$ & $\frac{1}{4}$, $\frac{1}{2}$, 1, 2, 4\\
 				$i_H$ & 300, 500, 800, 1300, 2100, 3400\\
 				\bottomrule
@@ -820,7 +827,7 @@
 	
 	\subsubsection{Parameters Tested}
 	
-	The parameters to the Jordan model are:
+	The parameters to the Jordan-based model are:
 	\begin{itemize}
 		\item $h$ -- The number of neurons in the ANN's hidden layer
 	\end{itemize}
@@ -850,11 +857,11 @@
 	
 	\subsection{Elman-Based Model}
 	
-	The Elman model was tested for its ability to produce complete melodies similar to the Jordan model described above. Unlike the previously discussed models however the Elman model does not use a timestep representation of music, but a pitch-duration one. Despite this a Hamming distance measure on a timestep representation of the output melody is a solid measure of accuracy, as it pays more heed to the absolute temporal position of musical events (a key component of musicality) than a purely duration-based measure.
+	The Elman-based model was tested for its ability to produce complete melodies similar to the Jordan-based model described above. Unlike the previously discussed models however the Elman-based model does not use a timestep representation of music, but a pitch-duration one. Despite this a Hamming distance measure on a timestep representation of the output melody is a solid measure of accuracy, as it pays more heed to the absolute temporal position of musical events (a key component of musicality) than a purely duration-based measure.
 	
 	\subsubsection{Parameters Tested}
 	
-	The parameters to the Elman model are:
+	The parameters to the Elman-based model are:
 	\begin{itemize}
 		\item $h$ -- The number of neurons in the ANN's hidden layer
 	\end{itemize}
@@ -888,13 +895,13 @@
 	
 	\subsection{Distance Model with HMM}
 	
-	
+	For the rhythm models, recreating a single bar is not as difficult as for the pitch models. As an experiment to determine their long-term modelling capability, the rhythm models were each tested on consecutive sets of 1, 2, and 4 bars.
 	
 	\subsubsection{Results for HMM}
 	
-	The HMM was tested with increasing numbers of iterations $i_H$ for each number of hidden states $s$ up until the model was able to consistently reach convergence. The number of EM iterations needed to reach convergence for each value of $s$ proved to feature a very high degree of variance. As a reminder, the HMM training process for this model involves fitting many different HMMs to the dataset and then selecting the best-performing, as a way to avoid using an HMM that converged early to a poor overall fit (see \ref{sec:jordan-implementation}). Due to the inherent randomness of the EM algorithm and the size/complexity of the data, this resulted in a fairly noisy spread of iterations-until-convergence, with no statistically significant relation. To resolve this would require more computation time than was allotted for testing, as the number of measurements needed to obtain a good view of the relationship between hidden states and training iterations was prohibitively large to obtain during this project.
+	The HMM was tested with increasing numbers of iterations $i_H$ for each number of hidden states $s$ up until the model was able to consistently reach convergence. The number of EM iterations needed to reach convergence for each value of $s$ proved to have a very high variance. As a reminder, the HMM training process for this model involves fitting many different HMMs to the dataset and then selecting the best-performing, as a way to avoid using an HMM that converged early to a poor overall fit (see \ref{sec:jordan-implementation}). Due to the inherent randomness of the EM algorithm and the size/complexity of the data, this resulted in a fairly noisy spread of iterations-until-convergence, with no statistically discernible relation. To resolve this would require more computation time than was allotted for testing, as the number of measurements needed to obtain a good view of the relationship between hidden states and training iterations was prohibitively large to obtain during this project.
 	
-	The accuracies of the converged HMMs for each of the completion tasks are given in table \ref{tab:hmm-results}. 
+	The accuracies of the converged HMMs for each of the completion tasks are given in table \ref{tab:hmm-results}. From this data, it can be observed that the benefit of increasing the size of the hidden state falls off sharply above 48 states, despite the more complex models having reached convergence. This is likely a simple limitation of the HMM; any patterns within the training set that are more complex than can be captured by 48 hidden states are not within the grasp of the HMM (as implemented here).
 	
 	\begin{table}[h]
 		\begin{center}
@@ -904,15 +911,15 @@
 				\cline{2-4}
 				Hidden States& $1$ & $2$ & $4$\\
 				\hline
-				$8$ & $-$ & $-$ & $-$\\
-				$16$ & $-$ & $-$ & $-$\\
-				$24$ & $-$ & $-$ & $-$\\
-				$32$ & $-$ & $-$ & $-$\\
-				$40$ & $-$ & $-$ & $-$\\
-				$48$ & $-$ & $-$ & $-$\\
-				$56$ & $-$ & $-$ & $-$\\
-				$64$ & $-$ & $-$ & $-$\\
-				$72$ & $-$ & $-$ & $-$\\
+				$8$ & $64.5\%$ & $-$ & $-$\\
+				$16$ & $75.9\%$ & $69.5\%$ & $66.5\%$\\
+				$24$ & $79.5\%$ & $76.8\%$ & $65.7\%$\\
+				$32$ & $79.3\%$ & $72.4\%$ & $67.4\%$\\
+				$40$ & $75.4\%$ & $71.6\%$ & $73.8\%$\\
+				$48$ & $83.6\%$ & $79.3\%$ & $75.8\%$\\
+				$56$ & $80.5\%$ & $75.5\%$ & $71.1\%$\\
+				$64$ & $79.6\%$ & $78.0\%$ & $73.8\%$\\
+				$72$ & $81.1\%$ & $77.3\%$ & $80.3\%$\\
 				\bottomrule
 			\end{tabular}
 		\end{center}
@@ -922,7 +929,9 @@
 	
 	\subsubsection{Results for Full Distance Model}
 	
-	The distance model was tested with different numbers of mixture model subpopulations $c$ and scoring factors $\lambda$. The parameters used for the HMM were $s = 48$, $i_H = 3000$, as these were determined to be good . The accuracy of the full rhythm model in rewriting rhythm is given in table \ref{tab:rhythm-model-results}. The accuracy for the model is fairly high; this can be expected due to the simplicity of rhythm compared to pitch, but even accounting for this the performance is high. It is however consistently imperfect. The reason for this becomes clear when shown actual examples of the model's work (figure \ref{fig:rhythm-model-example}): the model has a high propensity to write crotchets. This can be attributed to the distance model's influence primarily.
+	The distance model was tested with different numbers of mixture model subpopulations $c$ and scoring factors $\lambda$. The parameters used for the HMM were $s = 48$, $i_H = 3000$, as these were determined to be fairly optimal in the previous tests. The accuracy of the full rhythm model in rewriting rhythm is given in table \ref{tab:rhythm-model-results}. The accuracy for the model is fairly high; this can be expected due to the simplicity of rhythm compared to pitch, but even accounting for this the performance is above expectations. It is however consistently imperfect. The reason for this becomes clear with observation of the model's work: the model has a high propensity to write crotchets. This effect becomes stronger as the value of $\lambda$ is increased, and so can be attributed to a quirk of the distance model. This may mean that the usefulness of the distance model is somewhat dependent on genre; further testing with a larger training set would be needed to clarify this.
+	
+	The model also displays very low variance with respect to the values of $c$ and $\lambda$. An in-depth inspection of this revealed that the distance model simply makes small changes to the rhythm. Although these changes may have a significant impact on the musicality of the piece, they do not appear significant under the Hamming distance due to the small impact of changing the beginnings of notes (explained in \ref{sec:jordan-implementation}).
 	
 	\begin{table}[htp]
 		\begin{center}
@@ -932,21 +941,16 @@
 				\cline{3-5}
 				$c$ & $\lambda$ & $1$ & $2$ & $4$\\
 				\hline
-				$3$ & $0.25$ & $-$ & $-$ & $-$\\
-				& $0.5$      & $-$ & $-$ & $-$\\
-				& $1$        & $-$ & $-$ & $-$\\
-				& $2$        & $-$ & $-$ & $-$\\
-				& $4$        & $-$ & $-$ & $-$\\
-				$5$ & $0.25$ & $-$ & $-$ & $-$\\
-				& $0.5$      & $-$ & $-$ & $-$\\
-				& $1$        & $-$ & $-$ & $-$\\
-				& $2$        & $-$ & $-$ & $-$\\
-				& $4$        & $-$ & $-$ & $-$\\
-				$8$ & $0.25$ & $-$ & $-$ & $-$\\
-				& $0.5$      & $-$ & $-$ & $-$\\
-				& $1$        & $-$ & $-$ & $-$\\
-				& $2$        & $-$ & $-$ & $-$\\
-				& $4$        & $-$ & $-$ & $-$\\
+				$1$ & $0.25$ & $83.2\%$ & $78.7\%$ & $76.9\%$\\
+				& $0.5$      & $83.4\%$ & $79.3\%$ & $75.7\%$\\
+				& $1$        & $83.6\%$ & $79.5\%$ & $74.5\%$\\
+				& $2$        & $83.6\%$ & $79.6\%$ & $76.2\%$\\
+				& $4$        & $83.2\%$ & $79.6\%$ & $76.4\%$\\
+				$2$ & $0.25$ & $83.3\%$ & $79.1\%$ & $77.8\%$\\
+				& $0.5$      & $83.3\%$ & $79.3\%$ & $75.7\%$\\
+				& $1$        & $82.9\%$ & $79.3\%$ & $76.6\%$\\
+				& $2$        & $83.7\%$ & $79.3\%$ & $77.7\%$\\
+				& $4$        & $83.5\%$ & $79.7\%$ & $76.8\%$\\
 				\bottomrule
 			\end{tabular}
 		\end{center}
@@ -955,10 +959,8 @@
 	\end{table}
 	
 	
-	\subsection{Jordan Model}
+	\subsection{Jordan-Based Model}
 	\label{sec:objective-jordan}
-	
-	The Jordan model was tested with a fairly wide range of parameter, from $(h = 12, e = 300)$ to $(h = 72, e = 3400)$. Despite this the algorithm displayed a surprisingly small performance correlation with the number of hidden neurons in the network at some fairly high epoch counts. Although this appears at first to suggest that the number of hidden neurons does not have an impact on the performance of the network, this pattern becomes much more logical when visualising the correlation between epochs and performance for each value of $h$, as shown in figure \ref{fig:jordan-neuron-epoch-growth}. This shows that the networks with higher hidden neuron counts take longer to achieve peak performance, and so will perform equally or worse to simpler networks for sufficiently low epoch counts.
 	
 	\begin{table}[htp]
 		\begin{center}
@@ -968,26 +970,25 @@
 				\cline{2-8}
 				Hidden Layer& $3000$ & $5000$ & $8000$ & $13000$ & $21000$ & $34000$ & $55000$\\
 				\hline
-				$12$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$24$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$36$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$48$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$60$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$72$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$12$ & $18.5\%$ & $14.3\%$ & $13.8\%$ & $19.3\%$ & $17.8\%$ & $20.8\%$ & $17.3\%$\\
+				$24$ & $18.3\%$ & $17.2\%$ & $18.1\%$ & $18.5\%$ & $18.5\%$ & $18.1\%$ & $19.5\%$\\
+				$36$ & $19.0\%$ & $15.0\%$ & $17.5\%$ & $15.1\%$ & $17.5\%$ & $20.5\%$ & $21.3\%$\\
+				$48$ & $16.8\%$ & $15.7\%$ & $18.8\%$ & $14.7\%$ & $18.1\%$ & $17.0\%$ & $19.3\%$\\
+				$60$ & $17.3\%$ & $14.2\%$ & $20.1\%$ & $18.9\%$ & $13.2\%$ & $15.7\%$ & $15.6\%$\\
+				$72$ & $17.0\%$ & $16.4\%$ & $17.0\%$ & $17.4\%$ & $17.1\%$ & $16.6\%$ & $18.9\%$\\
 				\bottomrule
 			\end{tabular}
 		\end{center}
-		\caption{Accuracy of Jordan models against number of training epochs for completion of 1 bar}
+		\caption{Accuracy of Jordan-based models against number of training epochs for substitution of 1 bar}
 		\label{tab:jordan-1-bar-results}
 	\end{table}
 	
-	An interesting detail of the model is its performance in different sections of the song. It is expected that just as a melody has structure that varies over time, the performance of the model will vary throughout the song as well. This effect is particularly stark in this example however, likely due to the fact that nursery rhymes generally have a fairly compact song structure - a necessity when the entire song is only 8 bars long. The upshot of this is that certain sections of the melody, such as the introduction or the coda/outro, occur only for 1 bar or are entirely omitted. This increases the difficulty for the network in trying to learn these sections, resulting in them simply not being used in the generated pieces. This is reflected in the poor accuracy of the network during the final bar for most songs; the most typical way to end a song is to resolve back to the root tone, but as the root tone is otherwise infrequently played the network tends to avoid it. 
+	The number of neurons in the hidden layer did not have as significant of an impact on performance as would probably be expected from such an increase in computational potential. The reason for this can be attributed to the difference in complexity between exactly imitating a song and finding a simple approximation to it. Learning 6 different 8 bar songs is a very difficult task for an ANN, especially when almost the entirety of all of the songs consist of the same 8 notes in the C Major scale. As a result the number of neurons and training epochs needed to actually learn the patterns exactly would be extremely high - more so than would likely be desired for a practical application (even leaving aside the overfitting). As the models with higher neuron counts are still quite far from reaching convergence when the simple models have already converged, they naturally have a low accuracy - in some cases even lower than the simpler models. This can be observed in table \ref{tab:jordan-1-bar-results} as the simpler models fall-off in performance improvement much earlier than the complex models.
 	
-	% It can be noted that the Jordan model has an overall low accuracy, peaking at approximately $22\%$. This can be attributed to the difficulty of the task: from a pitch perspective, each song in the training/testing set features 128 consecutive discrete data points which take approximately 8 different values but follow a set of complex and often ambiguous pattern; a truly random model (within a single octave) has an expected accuracy $E(\mathbf{acc}) = (\frac{1}{12} \cdot \frac{1}{2}) \approx 0.042$, but improving on this value by any significant margin requires a very complex model. With that in mind, there are some definitely identifiable weaknesses of the model within this d
+	\subsection{Elman-Based model}
+	\label{sec:objective-elman}
 	
-	\subsection{Elman Model}
-	
-	The Elman model was tested for each given number of hidden neurons $h$ in ascending order, adjusting the range of training epochs in the same manner used in \ref{sec:objective-jordan}. The accuracies for recreating 1, 2, and 4 bars of the target melodies are given in tables \ref{tab:elman-1-bar-results}, \ref{tab:elman-2-bar-results}, and \ref{tab:elman-4-bar-results}.
+	The Elman-based model was tested for each given number of hidden neurons $h$ in ascending order, adjusting the range of training epochs in the same manner used in \ref{sec:objective-jordan}. The average accuracies for substituting the bars of the target melodies are given in table \ref{tab:elman-1-bar-results}. There appears to be a significant amount of noise in these results - the performance of an ANN trained on a given dataset may have a high variance in performance. While there was unfortunately no simple way to truly overcome this noise without performing a massive number of computations, the results still give a good general indicator of the effect of the parameters on performance. This shows a similar scaling to the Jordan-based model: The increase in performance with epochs is fairly minor, and in some cases not apparently noticeable; the same reasoning for this as with the Jordan-based model can be applied here.
 	
 	\begin{table}[htp]
 		\begin{center}
@@ -997,12 +998,12 @@
 				\cline{2-8}
 				Hidden Layer& $3000$ & $5000$ & $8000$ & $13000$ & $21000$ & $34000$ & $55000$\\
 				\hline
-				$12$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$24$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$36$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$48$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$60$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$72$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				$12$ & $20.5\%$ & $15.2\%$ & $15.4\%$ & $19.5\%$ & $17.1\%$ & $19.3\%$ & $17.0\%$\\
+				$24$ & $17.9\%$ & $15.4\%$ & $20.7\%$ & $14.7\%$ & $16.8\%$ & $18.8\%$ & $18.9\%$\\
+				$36$ & $18.3\%$ & $17.3\%$ & $17.1\%$ & $17.1\%$ & $18.0\%$ & $19.2\%$ & $19.3\%$\\
+				$48$ & $17.6\%$ & $18.0\%$ & $18.8\%$ & $17.2\%$ & $14.5\%$ & $18.9\%$ & $15.7\%$\\
+				$60$ & $16.0\%$ & $17.0\%$ & $18.2\%$ & $15.3\%$ & $12.8\%$ & $17.3\%$ & $15.7\%$\\
+				$72$ & $15.6\%$ & $17.2\%$ & $18.5\%$ & $18.6\%$ & $17.3\%$ & $19.7\%$ & $19.5\%$\\
 				\bottomrule
 			\end{tabular}
 		\end{center}
@@ -1010,81 +1011,26 @@
 		\label{tab:elman-1-bar-results}
 	\end{table}
 	
-	\begin{table}[htp]
-		\begin{center}
-			\begin{tabular}{cccccccc}
-				\toprule
-				Size of& \multicolumn{7}{c}{Epochs}\\
-				\cline{2-8}
-				Hidden Layer& $3000$ & $5000$ & $8000$ & $13000$ & $21000$ & $34000$ & $55000$\\
-				\hline
-				$12$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$24$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$36$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$48$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$60$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$72$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				\bottomrule
-			\end{tabular}
-		\end{center}
-		\caption{Average accuracy of Elman networks when completing 2 bars of melody}
-		\label{tab:elman-2-bar-results}
-	\end{table}
 	
-	\begin{table}[htp]
-		\begin{center}
-			\begin{tabular}{cccccccc}
-				\toprule
-				Size of& \multicolumn{7}{c}{Epochs}\\
-				\cline{2-8}
-				Hidden Layer& $3000$ & $5000$ & $8000$ & $13000$ & $21000$ & $34000$ & $55000$\\
-				\hline
-				$12$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$24$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$36$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$48$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$60$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				$72$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				\bottomrule
-			\end{tabular}
-		\end{center}
-		\caption{Average accuracy of Elman networks when completing 4 bars of melody}
-		\label{tab:elman-4-bar-results}
-	\end{table}
-	
-	As with the Jordan model, the Elman model does not have a particularly high degree of accuracy. This is a reasonable outcome given the sheer scope of the task.
-	% If it's better
-	It is s
-	% If it's worse
-	It is somewhat surprising however that the Elman model underperforms compared to the Jordan model on this task. As was previously established 
-	
-	An interesting detail of the model is its performance in different sections of the song. It is expected that just as a melody has structure that varies over time, the performance of the model will vary throughout the song as well. This effect is particularly stark in this example however, likely due to the fact that nursery rhymes generally have a fairly compact song structure - a necessity when the entire melody is only 8 bars long. The upshot of this is that certain sections of the melody, such as the introduction or the coda/outro, occur only for 1 bar or are entirely omitted. This increases the difficulty for the network in trying to learn these sections, resulting in them simply not being used in the generated pieces. This is reflected in the poor accuracy of the network during the final bar for most songs; the most typical way to end a song is to resolve back to the root tone, but as the root tone is otherwise infrequently played the network tends to avoid it. 
-	
-	The number of neurons in the hidden layer did not have as significant of an impact on performance as would probably be expected from such an increase in computational potential. The reason for this can be attributed to the difference in complexity between exactly imitating a song and finding a simple approximation to it. Learning 6 different 8 bar songs is a very difficult task for an ANN, especially when almost the entirety of all of the songs consist of the same 8 notes in the C Major scale. As a result the number of neurons and training epochs needed to actually learn the patterns exactly would be extremely high - more so than would likely be desired for a practical application (even leaving aside the overfitting). As the models with higher neuron counts are still quite far from reaching convergence when the simple models have already converged, they naturally have a low accuracy - in some cases even lower than the simpler models. This is shown in figure \ref{fig:elman-neurons-epochs-gradient}, which shows the growth in average accuracy of several models (of different neuron counts) as the number of epochs increase.
-	
-	\begin{figure}[h]
-		\centering
-		\caption{Model performance by average accuracy over number of training epochs}
-		\label{fig:elman-neurons-epochs-gradient}
-	\end{figure}
+	As with the Jordan-based model, the Elman-based model does not have a particularly high degree of accuracy. This is a reasonable outcome given the sheer scope of the task. An interesting detail of the model is its performance in different sections of the song. It is expected that just as a melody has structure that varies over time, the performance of the model will vary throughout the song as well. This effect is particularly stark in this example however, likely due to the fact that nursery rhymes generally have a fairly compact song structure - a necessity when the entire melody is only 8 bars long. The upshot of this is that certain sections of the melody, such as the introduction or the coda/outro, occur only for 1 bar or are entirely omitted. This increases the difficulty for the network in trying to learn these sections, resulting in them simply not being used in the generated pieces. This is reflected in the poor accuracy of the network during the final bar for most songs; the most typical way to end a song is to resolve back to the root tone, but as the root tone is otherwise infrequently played the network tends to avoid it. 
 	
 	\section{Subjective Results}
 	
 	In this section the results are given for the second stage of tests. These tests are reliant on a user feedback from a composer, and so the resulting testing process and analysis is slightly more complicated than in the previous batch of tests. In particular, the edit distance measure used to compare the original and modified melody fragments is an imperfect approximation of the actual effort required to derive one from the other. Because of this there will be some additional degree of subjective analysis focused on the similarity between the two fragments, in order to identify and explain any subtleties or notable features that are not well represented by the edit distance.
 	
-	Both of the models being tested (and the random model) were presented to 3 different skilled composers. In order to prevent any possibility of bias, each composer was not informed which algorithm was being tested while they ran through the tests. The tests occurred in a random order each time to try and reduce bias resulting from the composers warming up/wearing out. For each model the results are given averaged over each composer and also for each individual composer; the reason for this is that due to personal differences each composer may be more or less likely to make changes to the algorithm's output, and so it may be useful to compare different composers during analysis.
+	Both of the models being tested (and the random model) were presented to 2 different skilled composers. In order to prevent any possibility of bias, each composer was not informed which algorithm was being tested while they ran through the tests. The tests occurred in a random order each time to try and reduce bias resulting from the composers warming up/wearing out. For each model the results are given averaged over each composer and also for each individual composer; the reason for this is that due to personal differences each composer may be more or less likely to make changes to the algorithm's output, and so it may be useful to compare different composers during analysis.
 	
 	\begin{table}[htp]
 		\begin{center}
-			\begin{tabular}{ccccccccccccc}
+			\begin{tabular}{cccccccccc}
 				\toprule
-				& \multicolumn{3}{c}{Composer 1}& \multicolumn{3}{c}{Composer 2}& \multicolumn{3}{c}{Composer 3}& \multicolumn{3}{c}{Average}\\
+				& \multicolumn{3}{c}{Composer 1}& \multicolumn{3}{c}{Composer 2}& \multicolumn{3}{c}{Average}\\
 				%\cline{2-14}
-				Algorithm& 3\&4 & 5\&6 & 7\&8 & 3\&4 & 5\&6 & 7\&8 & 3\&4 & 5\&6 & 7\&8 & 3\&4 & 5\&6 & 7\&8 \\
+				Algorithm& 3\&4 & 5\&6 & 7\&8 & 3\&4 & 5\&6 & 7\&8 & 3\&4 & 5\&6 & 7\&8 \\
 				\hline
-				Jordan & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				Elman & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-				Random & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+				Jordan & $1$ & $0$ & $5$  & $0$ & $7$ & $2$ & $0.5$ & $3.5$ & $3.5$ \\
+				Elman  & $2$ & $2$ & $11$ & $4$ & $3$ & $1$ & $3$ & $2.5$ & $6$ \\
+				Random & $5$ & $5$ & $9$  & $6$ & $8$ & $4$ & $5.5$ & $6.5$ & $6.5$ \\
 				\bottomrule
 			\end{tabular}
 		\end{center}
@@ -1092,17 +1038,38 @@
 		\label{tab:subjective-results}
 	\end{table}
 	
-	\subsection{Jordan Model}
+	\subsection{Jordan-Based Model}
 	
-	The parameters used for the Jordan model were $s = 5$, $c = 5$, $\lambda = 5$, $h = 5$, and $e = 5$, based on the results obtained in \ref{sec:objective-jordan}. 
+	The parameters used for the Jordan-based model were $s = 48$, $c = 2$, $i_H = 3000$, $\lambda = 2.0$, $h = 72$, and $e = 55000$, based on the results obtained in \ref{sec:objective-jordan}. The Jordan-based model proved to be one of the most capable models in terms of writing realistic and high quality fragments; in a couple of cases the composers did not wish to make any change at all to its output. It also featured significant musical variance however: due to the particular random pitch selection of the ANN, it would occasionally stray out-of-key and subsequently behave more erratically (due to not being trained with notes outside of C major). The rhythm element behaved acceptably, although the distance measure was not able to pick up on some of the more interesting rhythmic features present in some of the composed pieces. Also notably the HMM had some issues, as some of the rhythmic patterns used in the composed pieces were very different to any of the training rhythms. While most of the time the HMM performed admirably in the face of these scenarios, in one instance it appeared to ``give up'' and produce an empty bar. This is a problem that could be resolved by using a larger, more diverse training set, but may be better answered with some change to the algorithm design to ensure that unusual music does not cause it to experience these problems. 
 	
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=1.0\textwidth]{jordan-perfect-example}
+		\caption{A piece partially composed by the Jordan-based model; bars 5 \& 6 are unedited outputs from the algorithm.}
+	\end{figure}
 	
-	\subsection{Elman Model}
+	\subsection{Elman-Based model}
+	
+	The parameters used for the Elman-based model were $h = 72$ and $e = 55000$, based on the results obtained in \ref{sec:objective-elman}. The Elman-based model performed reasonably well at the task, creating some fairly pleasant sounding melodies. It did have a very clear flaw in that it strayed off-key quite often - nearly 50\% of the time, in fact; this did not significantly impede its overall effectiveness to a large extent, as the composers would simply select outputs that did not have this problem. One clear outlier for this case however is the replacement of bars 7 \& 8 for composer 1; the model did not match the rhythm of the composed song well, and so the composer made many splits and merges to resolve the issue, resulting in a very high edit distance.
+	
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=1.0\textwidth]{elman-unedited-example}
+		\includegraphics[width=1.0\textwidth]{elman-edited-example}
+		\caption{A piece partially composed by the Elman-based model; bars 3 \& 4 in the first line are outputs from the algorithm, and in the second line they have been edited by the original composer.}
+	\end{figure}
 	
 	
 	\subsection{Random Model}
 
-	The random model is simply the chaotic generation algorithm described in \cite{coca2010characterizing} and used in the Elman-based model. Although more or less random, this is an interesting point of comparison with the other models, as such chaotic algorithms (or similar functions) are actually currently used by some composers to generate material for writing music. In this sense any improvement over this model would constitute some useful progress, as to do so would be to improve on an existing composition tool (albeit a fairly uncommon and simple one).
+	The random model is simply the chaotic generation algorithm described in \cite{coca2010characterizing} and used in the Elman-based model. Although more or less random, this is an interesting point of comparison with the other models, as such chaotic algorithms (or similar functions) are actually currently used by some composers to generate material for writing music. In this sense any improvement over this model would constitute some useful progress, as to do so would be to improve on an existing composition tool (albeit a fairly uncommon and simple one). With this in mind, the actual performance of the random model was not particularly impressive in terms of the direct musical quality. Although it created some brief segments of interest that could be used, it also had a high tendency to sprawl wildly at times. Quite typically it would produce rapid series of unrelated notes, not out-of-key but without cadence or any discernible pattern. It did not often take too many edits to create something of reasonably quality from the material the random model produced however; in this sense it is understandable that some composers would see it as a useful tool. Ironically enough, the randomness also led to a lower overall variance of results; while the model rarely produced melodies of quality, it also never fully committed to a melody that was not to the composer's taste - there was always some element that could be used. 
+	
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=1.0\textwidth]{random-unedited-example}
+		\includegraphics[width=1.0\textwidth]{random-edited-example}
+		\caption{A piece partially composed by the random model; bars 7 \& 8 in the first line are outputs from the algorithm, and in the second line they have been edited by the original composer.}
+	\end{figure}
 
 	% -----------------------------------------------------------------------------
 	
@@ -1124,8 +1091,6 @@
 	In terms of the former, there has been a reasonable amount of progress made. The current application has a few limitations, but performs the fundamental task fairly well; within the limited sphere of music that it has been trained and tested with the model is able to successfully provide useful inspiration to human composers. Notably a significant amount of the work needed to achieve this was in research and analysis of available methods. The reason for this being that while the algorithms themselves are not largely novel, the particular task they have been applied to is, and so determining the properties necessary to achieve this style of co-composition was an important step of progress. This is not to understate the value in adapting, implementing, and optimizing/testing these algorithms - but narrowing down and justifying the likely means by which an algorithmic co-composer could be developed gives a good starting point for any research in the topic.
 	
 	There is still much work to be done before this application could be considered a viable commercial product however. Beyond tangential matters such as an intuitive user interface or the collection of training data, the actual composition algorithm is unproven in some respects, and requires definite improvements in others. The most obvious deficiency in the results given is that the dataset used to gather them consisted only of nursery rhymes, which are musically sound but have many differences with most popular music (which is the likely target use case). Furthermore the tests were limited computationally (discussed further in \ref{sec:project-evaluation}), leaving it unknown how well the algorithms scale up to very large datasets in terms of performance and efficiency. Finally there are some harsh limitations within the algorithms themselves; each one can only understand monophonic melodies within a limited range of octaves, and lacks any direct understanding of higher level concepts such as chord progressions or sections within a piece. Some of these issues may be fairly simple to resolve while others might require some complex and fundamental changes to the algorithms, if not requiring an entirely new approach.
-	
-	% TODO
 	
 	\subsection{Evaluation}
 	\label{sec:project-evaluation}
